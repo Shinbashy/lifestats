@@ -1,3 +1,23 @@
+export type Gender = 'male' | 'female' | null;
+
+export interface GenderStats {
+  // Adjusted based on gender
+  adjustedLifeExpectancy: number;
+  adjustedLifespanPercentage: number;
+  adjustedHeartbeats: number;
+  caloriesBurned: number;
+  redBloodCellsProduced: number;
+  
+  // Female-specific
+  menstrualCycles?: number;
+  periodsHad?: number;
+  eggsReleased?: number;
+  
+  // Male-specific
+  testosteroneCycles?: number;
+  facialHairGrown?: number; // in inches
+}
+
 export interface LifeStats {
   // Time
   daysAlive: number;
@@ -231,6 +251,90 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date()): Life
     isInBillionClub,
     isIn10kClub,
   };
+}
+
+// Gender-specific constants
+const MALE_LIFE_EXPECTANCY = 76;
+const FEMALE_LIFE_EXPECTANCY = 81;
+const MALE_HEARTBEATS_PER_DAY = 100800; // ~70 bpm
+const FEMALE_HEARTBEATS_PER_DAY = 112320; // ~78 bpm
+const MALE_CALORIES_PER_DAY = 2500;
+const FEMALE_CALORIES_PER_DAY = 2000;
+const RED_BLOOD_CELLS_PER_DAY_MALE = 200_000_000_000; // 200 billion
+const RED_BLOOD_CELLS_PER_DAY_FEMALE = 180_000_000_000; // 180 billion
+
+// Female-specific
+const MENSTRUAL_CYCLE_DAYS = 28;
+const MENARCHE_AGE = 12; // Average age of first period
+const MENOPAUSE_AGE = 51; // Average age of menopause
+
+// Male-specific
+const PUBERTY_AGE_MALE = 13;
+const FACIAL_HAIR_INCHES_PER_YEAR = 5.5; // After puberty
+
+export function calculateGenderStats(
+  birthday: Date,
+  gender: Gender,
+  now: Date = new Date()
+): GenderStats | null {
+  if (!gender) return null;
+  
+  const msAlive = now.getTime() - birthday.getTime();
+  const daysAlive = Math.floor(msAlive / (24 * 60 * 60 * 1000));
+  const yearsAlive = msAlive / (365.25 * 24 * 60 * 60 * 1000);
+  
+  const isMale = gender === 'male';
+  const isFemale = gender === 'female';
+  
+  // Adjusted life expectancy
+  const adjustedLifeExpectancy = isMale ? MALE_LIFE_EXPECTANCY : FEMALE_LIFE_EXPECTANCY;
+  const adjustedLifespanMs = adjustedLifeExpectancy * 365.25 * 24 * 60 * 60 * 1000;
+  const adjustedLifespanPercentage = (msAlive / adjustedLifespanMs) * 100;
+  
+  // Adjusted heartbeats
+  const heartbeatsPerDay = isMale ? MALE_HEARTBEATS_PER_DAY : FEMALE_HEARTBEATS_PER_DAY;
+  const adjustedHeartbeats = Math.floor(daysAlive * heartbeatsPerDay);
+  
+  // Calories burned
+  const caloriesPerDay = isMale ? MALE_CALORIES_PER_DAY : FEMALE_CALORIES_PER_DAY;
+  const caloriesBurned = Math.floor(daysAlive * caloriesPerDay);
+  
+  // Red blood cells produced
+  const rbcPerDay = isMale ? RED_BLOOD_CELLS_PER_DAY_MALE : RED_BLOOD_CELLS_PER_DAY_FEMALE;
+  const redBloodCellsProduced = Math.floor(daysAlive * rbcPerDay);
+  
+  const baseStats: GenderStats = {
+    adjustedLifeExpectancy,
+    adjustedLifespanPercentage,
+    adjustedHeartbeats,
+    caloriesBurned,
+    redBloodCellsProduced,
+  };
+  
+  // Female-specific stats
+  if (isFemale) {
+    const yearsWithPeriods = Math.max(0, Math.min(yearsAlive - MENARCHE_AGE, MENOPAUSE_AGE - MENARCHE_AGE));
+    const daysWithPeriods = yearsWithPeriods * 365.25;
+    
+    if (yearsAlive >= MENARCHE_AGE) {
+      baseStats.menstrualCycles = Math.floor(daysWithPeriods / MENSTRUAL_CYCLE_DAYS);
+      baseStats.periodsHad = baseStats.menstrualCycles;
+      baseStats.eggsReleased = baseStats.menstrualCycles; // Roughly 1 egg per cycle
+    }
+  }
+  
+  // Male-specific stats
+  if (isMale) {
+    const yearsAfterPuberty = Math.max(0, yearsAlive - PUBERTY_AGE_MALE);
+    
+    if (yearsAlive >= PUBERTY_AGE_MALE) {
+      // Testosterone cycles roughly daily
+      baseStats.testosteroneCycles = Math.floor(yearsAfterPuberty * 365.25);
+      baseStats.facialHairGrown = yearsAfterPuberty * FACIAL_HAIR_INCHES_PER_YEAR;
+    }
+  }
+  
+  return baseStats;
 }
 
 export function formatNumber(num: number): string {
