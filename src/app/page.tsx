@@ -8,6 +8,7 @@ import BirthdayCountdown from '@/components/BirthdayCountdown';
 import ShareCard from '@/components/ShareCard';
 import LifeInWeeksGrid from '@/components/LifeInWeeksGrid';
 import PlanetaryAges from '@/components/PlanetaryAges';
+import CollapsibleSection from '@/components/CollapsibleSection';
 
 // Conversion helpers
 function createUnits(conversions: { label: string; value: number; suffix?: string; decimals?: number }[]): UnitOption[] {
@@ -380,17 +381,14 @@ export default function Home() {
             </div>
 
             {/* Time Stats */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>⏱️</span> Time Alive
-              </h2>
+            <CollapsibleSection title="Time Alive" icon="⏱️">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard icon="📅" label="Days" value={stats.daysAlive} delay={1} units={unitConversions.days} />
                 <StatCard icon="📆" label="Weeks" value={stats.weeksAlive} delay={2} />
                 <StatCard icon="⏰" label="Hours" value={stats.hoursAlive} delay={3} units={unitConversions.hours} />
                 <StatCard icon="🌅" label="Sunrises" value={stats.sunrisesWitnessed} delay={4} />
               </div>
-            </div>
+            </CollapsibleSection>
 
             {/* Birth Identity Card */}
             <div className="stat-card rounded-2xl p-6 border-2 border-purple-500/30">
@@ -609,10 +607,7 @@ export default function Home() {
             )}
 
             {/* Body Stats */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>🧬</span> Your Body
-              </h2>
+            <CollapsibleSection title="Your Body" icon="🧬">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard icon="💓" label="Heartbeats" value={stats.heartbeats} delay={5} units={unitConversions.heartbeats} />
                 <StatCard icon="🌬️" label="Breaths" value={stats.breaths} delay={6} units={unitConversions.breaths} />
@@ -628,7 +623,7 @@ export default function Home() {
                 <StatCard icon="🚽" label="Toilet Time" value={stats.toiletHours} delay={16} units={unitConversions.toilet} />
                 <StatCard icon="🔄" label="Blood Recycles" value={stats.bloodRecycles} delay={17} />
               </div>
-            </div>
+            </CollapsibleSection>
 
             {/* Gender-Specific Stats (Premium) */}
             {genderStats && (
@@ -718,10 +713,7 @@ export default function Home() {
             )}
 
             {/* Cosmic Stats */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>🚀</span> Cosmic Journey
-              </h2>
+            <CollapsibleSection title="Cosmic Journey" icon="🚀">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <StatCard icon="🌍" label="Earth Orbits" value={stats.earthOrbits} delay={18} decimals={2} />
                 <StatCard icon="🌕" label="Full Moons" value={stats.fullMoons} delay={19} showFull />
@@ -735,7 +727,7 @@ export default function Home() {
               <p className="text-xs text-gray-500 mt-2 text-center">
                 * Earth travels 1.6 million miles per day around the Sun. You&apos;ve been along for the ride!
               </p>
-            </div>
+            </CollapsibleSection>
 
             {/* Planetary Ages */}
             <PlanetaryAges planetaryAges={stats.planetaryAges} />
@@ -744,10 +736,7 @@ export default function Home() {
             <LifeInWeeksGrid lifeInWeeks={stats.lifeInWeeks} />
 
             {/* Digital Stats */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>📱</span> Digital Life
-              </h2>
+            <CollapsibleSection title="Digital Life" icon="📱">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard icon="🔍" label="Google Searches" value={stats.googleSearches} delay={24} units={unitConversions.googleSearches} />
                 <StatCard icon="📧" label="Emails" value={stats.emailsSent} delay={25} units={unitConversions.emails} />
@@ -757,16 +746,10 @@ export default function Home() {
               <p className="text-xs text-gray-500 mt-2 text-center">
                 * Calculated from internet era (1998) and smartphone era (2010)
               </p>
-            </div>
+            </CollapsibleSection>
 
             {/* Consumption Stats */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>🍽️</span> Consumption
-                <span className="text-xs text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
-                  {COUNTRY_PROFILES[country || 'us'].flag} local cuisine
-                </span>
-              </h2>
+            <CollapsibleSection title="Consumption" icon="🍽️" badge={`${COUNTRY_PROFILES[country || 'us'].flag} local cuisine`} badgeColor="emerald">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {stats.foodStats.map((food, index) => (
                   <StatCard 
@@ -786,16 +769,10 @@ export default function Home() {
               <p className="text-xs text-gray-500 mt-2 text-center">
                 * Based on {COUNTRY_PROFILES[country || 'us'].name} averages. Coffee counted from age 18+.
               </p>
-            </div>
+            </CollapsibleSection>
 
             {/* Time Spent Stats */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>⏰</span> Time Spent
-                <span className="text-xs text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
-                  {COUNTRY_PROFILES[country || 'us'].flag} adjusted
-                </span>
-              </h2>
+            <CollapsibleSection title="Time Spent" icon="⏰" badge={`${COUNTRY_PROFILES[country || 'us'].flag} adjusted`} badgeColor="emerald">
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <StatCard icon="🍽️" label="Eating" value={stats.hoursEating} delay={34} units={unitConversions.eating} />
                 <StatCard icon="🚿" label="Showering" value={stats.hoursShowering} delay={35} units={unitConversions.showering} />
@@ -810,13 +787,10 @@ export default function Home() {
               <p className="text-xs text-gray-500 mt-2 text-center">
                 * Adjusted for {COUNTRY_PROFILES[country || 'us'].name} lifestyle. Driving stats from age 16+. Screens from smartphone era.
               </p>
-            </div>
+            </CollapsibleSection>
 
             {/* World Events */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>🏛️</span> World Events
-              </h2>
+            <CollapsibleSection title="World Events" icon="🏛️" defaultOpen={false}>
               <div className="stat-card rounded-2xl p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div>
@@ -843,13 +817,10 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </div>
+            </CollapsibleSection>
 
             {/* World Context */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>🌍</span> Your World
-              </h2>
+            <CollapsibleSection title="Your World" icon="🌍" defaultOpen={false}>
               <div className="stat-card rounded-2xl p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
@@ -871,7 +842,7 @@ export default function Home() {
                   </div>
                 </div>
               </div>
-            </div>
+            </CollapsibleSection>
 
             {/* Upcoming Milestones */}
             {(stats.daysUntil10k || stats.daysUntilBillionSeconds) && (
@@ -931,44 +902,43 @@ export default function Home() {
             />
 
             {/* Fun Facts */}
-            <div className="stat-card rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>💡</span> Fun Facts
-              </h3>
-              <ul className="space-y-3 text-gray-300">
-                <li className="flex items-start gap-2">
-                  <span className="text-indigo-400">•</span>
-                  You&apos;ve walked approximately <span className="text-white font-semibold">{stats.stepsWalked.toLocaleString()}</span> steps
-                  ({Math.floor(stats.stepsWalked / 2000).toLocaleString()} miles)
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-purple-400">•</span>
-                  You&apos;ve eaten around <span className="text-white font-semibold">{stats.mealsEaten.toLocaleString()}</span> meals
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-pink-400">•</span>
-                  You&apos;ve spoken roughly <span className="text-white font-semibold">{(stats.wordsSpoken / 1000000).toFixed(1)}M</span> words — enough for <span className="text-white font-semibold">{Math.floor(stats.wordsSpoken / 80000).toLocaleString()}</span> novels!
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-cyan-400">•</span>
-                  Your hair has grown <span className="text-white font-semibold">{(stats.hairGrownInches / 12).toFixed(1)} feet</span> total
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-amber-400">•</span>
-                  You&apos;ve slept for <span className="text-white font-semibold">{(stats.sleepHours / 24 / 365.25).toFixed(1)} years</span> of your life
-                </li>
-                <li className="flex items-start gap-2">
-                  <span className="text-emerald-400">•</span>
-                  Your heart has pumped enough blood to fill <span className="text-white font-semibold">{Math.floor(stats.bloodPumpedGallons / 660_000).toLocaleString()}</span> Olympic swimming pools!
-                </li>
-                {stats.isInBillionClub && (
+            <CollapsibleSection title="Fun Facts" icon="💡" defaultOpen={false}>
+              <div className="stat-card rounded-2xl p-6">
+                <ul className="space-y-3 text-gray-300">
                   <li className="flex items-start gap-2">
-                    <span className="text-yellow-400">🏆</span>
-                    <span className="text-yellow-300 font-semibold">You&apos;ve been alive for over 1 BILLION seconds!</span>
+                    <span className="text-indigo-400">•</span>
+                    You&apos;ve walked approximately <span className="text-white font-semibold">{stats.stepsWalked.toLocaleString()}</span> steps
+                    ({Math.floor(stats.stepsWalked / 2000).toLocaleString()} miles)
                   </li>
-                )}
-              </ul>
-            </div>
+                  <li className="flex items-start gap-2">
+                    <span className="text-purple-400">•</span>
+                    You&apos;ve eaten around <span className="text-white font-semibold">{stats.mealsEaten.toLocaleString()}</span> meals
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-pink-400">•</span>
+                    You&apos;ve spoken roughly <span className="text-white font-semibold">{(stats.wordsSpoken / 1000000).toFixed(1)}M</span> words — enough for <span className="text-white font-semibold">{Math.floor(stats.wordsSpoken / 80000).toLocaleString()}</span> novels!
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-cyan-400">•</span>
+                    Your hair has grown <span className="text-white font-semibold">{(stats.hairGrownInches / 12).toFixed(1)} feet</span> total
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-amber-400">•</span>
+                    You&apos;ve slept for <span className="text-white font-semibold">{(stats.sleepHours / 24 / 365.25).toFixed(1)} years</span> of your life
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-emerald-400">•</span>
+                    Your heart has pumped enough blood to fill <span className="text-white font-semibold">{Math.floor(stats.bloodPumpedGallons / 660_000).toLocaleString()}</span> Olympic swimming pools!
+                  </li>
+                  {stats.isInBillionClub && (
+                    <li className="flex items-start gap-2">
+                      <span className="text-yellow-400">🏆</span>
+                      <span className="text-yellow-300 font-semibold">You&apos;ve been alive for over 1 BILLION seconds!</span>
+                    </li>
+                  )}
+                </ul>
+              </div>
+            </CollapsibleSection>
 
             {/* Share Section */}
             <ShareCard stats={stats} birthday={birthdayDate} />
