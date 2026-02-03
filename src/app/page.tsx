@@ -172,10 +172,12 @@ export default function Home() {
                 className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white text-lg focus:outline-none focus:border-indigo-500 transition-colors"
                 max={new Date().toISOString().split('T')[0]}
                 required
+                tabIndex={1}
               />
               <button
                 type="submit"
                 className="btn-primary w-full mt-4 py-3 rounded-xl font-semibold text-white text-lg"
+                tabIndex={2}
               >
                 ✨ Calculate My Stats
               </button>
