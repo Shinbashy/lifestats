@@ -11,6 +11,84 @@ import PlanetaryAges from '@/components/PlanetaryAges';
 import CollapsibleSection from '@/components/CollapsibleSection';
 import PersonalizationModal, { PersonalData } from '@/components/PersonalizationModal';
 import PersonalizedComparison from '@/components/PersonalizedComparison';
+import { saveProfile, loadProfile, UserProfile } from '@/lib/supabase';
+
+// Helpers to convert between frontend PersonalData and database UserProfile
+function personalDataToProfile(data: PersonalData, birthday: string, gender: Gender, country: Country): Omit<UserProfile, 'id' | 'created_at' | 'updated_at'> {
+  // Convert height from ft/in to cm
+  let heightCm: number | undefined;
+  if (data.heightFeet) {
+    const totalInches = (data.heightFeet * 12) + (data.heightInches || 0);
+    heightCm = Math.round(totalInches * 2.54);
+  }
+  
+  // Convert weight from lbs to kg
+  const weightKg = data.weightLbs ? Math.round(data.weightLbs * 0.453592) : undefined;
+  
+  // Map activity level
+  const activityMap: Record<string, UserProfile['activity_level']> = {
+    'mostly_sitting': 'sedentary',
+    'mixed': 'moderate',
+    'on_feet': 'active',
+    'physical_job': 'very_active',
+  };
+  
+  return {
+    birthday,
+    gender: gender || undefined,
+    country: country || 'us',
+    height_cm: heightCm,
+    weight_kg: weightKg,
+    activity_level: data.workActivity ? activityMap[data.workActivity] : undefined,
+    sleep_hours: data.sleepHours,
+    coffee_per_day: data.coffeePerDay,
+    alcohol_frequency: data.alcoholFrequency,
+    smoker_status: data.smokerStatus,
+    work_style: data.workStyle,
+    work_hours_per_week: data.workHoursPerWeek,
+    commute_minutes: data.commuteMinutes,
+    industry: data.industry,
+    accepted_terms: data.acceptedTerms,
+  };
+}
+
+function profileToPersonalData(profile: UserProfile): PersonalData {
+  // Convert height from cm to ft/in
+  let heightFeet: number | undefined;
+  let heightInches: number | undefined;
+  if (profile.height_cm) {
+    const totalInches = profile.height_cm / 2.54;
+    heightFeet = Math.floor(totalInches / 12);
+    heightInches = Math.round(totalInches % 12);
+  }
+  
+  // Convert weight from kg to lbs
+  const weightLbs = profile.weight_kg ? Math.round(profile.weight_kg / 0.453592) : undefined;
+  
+  // Map activity level back
+  const activityMap: Record<string, PersonalData['workActivity']> = {
+    'sedentary': 'mostly_sitting',
+    'moderate': 'mixed',
+    'active': 'on_feet',
+    'very_active': 'physical_job',
+  };
+  
+  return {
+    heightFeet,
+    heightInches,
+    weightLbs,
+    workActivity: profile.activity_level ? activityMap[profile.activity_level] : undefined,
+    sleepHours: profile.sleep_hours ?? undefined,
+    coffeePerDay: profile.coffee_per_day ?? undefined,
+    alcoholFrequency: profile.alcohol_frequency ?? undefined,
+    smokerStatus: profile.smoker_status ?? undefined,
+    workStyle: profile.work_style ?? undefined,
+    workHoursPerWeek: profile.work_hours_per_week ?? undefined,
+    commuteMinutes: profile.commute_minutes ?? undefined,
+    industry: profile.industry ?? undefined,
+    acceptedTerms: profile.accepted_terms ?? undefined,
+  };
+}
 
 // Conversion helpers
 function createUnits(conversions: { label: string; value: number; suffix?: string; decimals?: number }[]): UnitOption[] {
@@ -27,7 +105,33 @@ export default function Home() {
   const [liveSeconds, setLiveSeconds] = useState(0);
   const [showPersonalization, setShowPersonalization] = useState(false);
   const [personalData, setPersonalData] = useState<PersonalData | null>(null);
+  const [profileId, setProfileId] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Load saved profile from localStorage on mount
+  useEffect(() => {
+    const savedProfileId = localStorage.getItem('lifestats_profile_id');
+    if (savedProfileId) {
+      setProfileId(savedProfileId);
+      loadProfile(savedProfileId).then(profile => {
+        if (profile) {
+          // Restore birthday, gender, country from profile
+          setBirthday(profile.birthday);
+          if (profile.gender) setGender(profile.gender);
+          if (profile.country) setCountry(profile.country as Country);
+          
+          // Restore personal data
+          setPersonalData(profileToPersonalData(profile));
+          
+          // Auto-submit to show stats
+          setTimeout(() => {
+            submitButtonRef.current?.click();
+          }, 100);
+        }
+      });
+    }
+  }, []);
 
   const handleSubmit = useCallback((e?: React.FormEvent) => {
     e?.preventDefault();
@@ -999,11 +1103,26 @@ export default function Home() {
         <PersonalizationModal
           isOpen={showPersonalization}
           onClose={() => setShowPersonalization(false)}
-          onComplete={(data) => {
+          onComplete={async (data) => {
             setPersonalData(data);
             setShowPersonalization(false);
-            // TODO: Recalculate stats with personal data
-            console.log('Personal data:', data);
+            setIsSaving(true);
+            
+            // Save to Supabase
+            try {
+              const profileData = personalDataToProfile(data, birthday, gender, country);
+              const newProfileId = await saveProfile(profileData);
+              
+              if (newProfileId) {
+                setProfileId(newProfileId);
+                localStorage.setItem('lifestats_profile_id', newProfileId);
+                console.log('Profile saved:', newProfileId);
+              }
+            } catch (error) {
+              console.error('Failed to save profile:', error);
+            } finally {
+              setIsSaving(false);
+            }
           }}
         />
       </div>
