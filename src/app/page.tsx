@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { calculateLifeStats, LifeStats, formatDate, formatNumber } from '@/lib/calculations';
 import StatCard, { UnitOption } from '@/components/StatCard';
 import ProgressBar from '@/components/ProgressBar';
@@ -17,6 +17,7 @@ export default function Home() {
   const [stats, setStats] = useState<LifeStats | null>(null);
   const [birthdayDate, setBirthdayDate] = useState<Date | null>(null);
   const [liveSeconds, setLiveSeconds] = useState(0);
+  const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleSubmit = useCallback((e?: React.FormEvent) => {
     e?.preventDefault();
@@ -169,15 +170,20 @@ export default function Home() {
                 type="date"
                 value={birthday}
                 onChange={(e) => setBirthday(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Tab' && !e.shiftKey) {
+                    e.preventDefault();
+                    submitButtonRef.current?.focus();
+                  }
+                }}
                 className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white text-lg focus:outline-none focus:border-indigo-500 transition-colors"
                 max={new Date().toISOString().split('T')[0]}
                 required
-                tabIndex={1}
               />
               <button
+                ref={submitButtonRef}
                 type="submit"
-                className="btn-primary w-full mt-4 py-3 rounded-xl font-semibold text-white text-lg"
-                tabIndex={2}
+                className="btn-primary w-full mt-4 py-3 rounded-xl font-semibold text-white text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
               >
                 ✨ Calculate My Stats
               </button>
