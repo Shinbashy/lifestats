@@ -34,9 +34,6 @@ export default function LifeInWeeksGrid({ lifeInWeeks }: LifeInWeeksGridProps) {
 
   return (
     <div className="stat-card rounded-2xl p-6">
-      <h2 className="text-lg font-semibold text-gray-300 mb-2 flex items-center gap-2">
-        <span>📊</span> Your Life in Weeks
-      </h2>
       <p className="text-sm text-gray-400 mb-4">
         Each box = 1 week. Each row = 1 year. Inspired by{' '}
         <a 

@@ -31,9 +31,6 @@ const textColors: Record<string, string> = {
 export default function PlanetaryAges({ planetaryAges }: PlanetaryAgesProps) {
   return (
     <div className="stat-card rounded-2xl p-6">
-      <h2 className="text-lg font-semibold text-gray-300 mb-2 flex items-center gap-2">
-        <span>🪐</span> Your Age on Other Planets
-      </h2>
       <p className="text-sm text-gray-400 mb-4">
         Each planet has a different orbital period. Here&apos;s how old you&apos;d be!
       </p>
