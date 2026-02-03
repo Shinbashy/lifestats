@@ -9,6 +9,7 @@ import ShareCard from '@/components/ShareCard';
 import LifeInWeeksGrid from '@/components/LifeInWeeksGrid';
 import PlanetaryAges from '@/components/PlanetaryAges';
 import CollapsibleSection from '@/components/CollapsibleSection';
+import PersonalizationModal, { PersonalData } from '@/components/PersonalizationModal';
 
 // Conversion helpers
 function createUnits(conversions: { label: string; value: number; suffix?: string; decimals?: number }[]): UnitOption[] {
@@ -23,6 +24,8 @@ export default function Home() {
   const [genderStats, setGenderStats] = useState<GenderStats | null>(null);
   const [birthdayDate, setBirthdayDate] = useState<Date | null>(null);
   const [liveSeconds, setLiveSeconds] = useState(0);
+  const [showPersonalization, setShowPersonalization] = useState(false);
+  const [personalData, setPersonalData] = useState<PersonalData | null>(null);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   const handleSubmit = useCallback((e?: React.FormEvent) => {
@@ -379,6 +382,43 @@ export default function Home() {
             <div className="text-center text-sm text-gray-500">
               💡 Tap any stat with ↻ to change units
             </div>
+
+            {/* Personalization Prompt */}
+            {!personalData && (
+              <div className="stat-card rounded-2xl p-6 border-2 border-indigo-500/30 bg-gradient-to-r from-indigo-500/10 to-purple-500/10">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                      <span>🎯</span> Get Personalized Stats
+                    </h3>
+                    <p className="text-sm text-gray-400 mt-1">
+                      Your stats use averages. Add your info for accurate insights tailored to YOU.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowPersonalization(true)}
+                    className="btn-primary px-5 py-2.5 rounded-xl font-semibold text-white whitespace-nowrap"
+                  >
+                    Personalize →
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Personalized Badge */}
+            {personalData && (
+              <div className="flex items-center justify-center gap-2 text-sm">
+                <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1 rounded-full font-medium">
+                  ✨ Personalized Stats Active
+                </span>
+                <button
+                  onClick={() => setShowPersonalization(true)}
+                  className="text-indigo-400 hover:underline"
+                >
+                  Edit
+                </button>
+              </div>
+            )}
 
             {/* Time Stats */}
             <CollapsibleSection title="Time Alive" icon="⏱️">
@@ -943,6 +983,18 @@ export default function Home() {
             </div>
           </div>
         )}
+
+        {/* Personalization Modal */}
+        <PersonalizationModal
+          isOpen={showPersonalization}
+          onClose={() => setShowPersonalization(false)}
+          onComplete={(data) => {
+            setPersonalData(data);
+            setShowPersonalization(false);
+            // TODO: Recalculate stats with personal data
+            console.log('Personal data:', data);
+          }}
+        />
       </div>
     </main>
   );
