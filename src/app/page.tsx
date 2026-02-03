@@ -10,6 +10,7 @@ import LifeInWeeksGrid from '@/components/LifeInWeeksGrid';
 import PlanetaryAges from '@/components/PlanetaryAges';
 import CollapsibleSection from '@/components/CollapsibleSection';
 import PersonalizationModal, { PersonalData } from '@/components/PersonalizationModal';
+import PersonalizedComparison from '@/components/PersonalizedComparison';
 
 // Conversion helpers
 function createUnits(conversions: { label: string; value: number; suffix?: string; decimals?: number }[]): UnitOption[] {
@@ -418,6 +419,16 @@ export default function Home() {
                   Edit
                 </button>
               </div>
+            )}
+
+            {/* Personalized Comparison */}
+            {personalData && (
+              <PersonalizedComparison
+                personalData={personalData}
+                stats={stats}
+                country={country}
+                yearsAlive={stats.earthOrbits}
+              />
             )}
 
             {/* Time Stats */}
