@@ -33,6 +33,8 @@ interface PersonalizationModalProps {
   isOpen: boolean;
   onClose: () => void;
   onComplete: (data: PersonalData) => void;
+  onSavePartial?: (data: PersonalData) => void;
+  initialData?: PersonalData | null;
 }
 
 const INDUSTRIES = [
@@ -50,9 +52,16 @@ const INDUSTRIES = [
   'Other',
 ];
 
-export default function PersonalizationModal({ isOpen, onClose, onComplete }: PersonalizationModalProps) {
+export default function PersonalizationModal({ isOpen, onClose, onComplete, onSavePartial, initialData }: PersonalizationModalProps) {
   const [step, setStep] = useState(1);
-  const [data, setData] = useState<PersonalData>({});
+  const [data, setData] = useState<PersonalData>(initialData || {});
+
+  // Reset data when modal opens with new initial data
+  const [lastInitialData, setLastInitialData] = useState(initialData);
+  if (initialData !== lastInitialData) {
+    setLastInitialData(initialData);
+    if (initialData) setData(initialData);
+  }
 
   if (!isOpen) return null;
 
@@ -69,10 +78,20 @@ export default function PersonalizationModal({ isOpen, onClose, onComplete }: Pe
     onClose();
   };
 
+  const handleSaveAndClose = () => {
+    // Save partial progress without requiring terms
+    if (onSavePartial) {
+      onSavePartial(data);
+    }
+    onClose();
+  };
+
   const canProceed = () => {
     // All fields optional - can always proceed
     return true;
   };
+  
+  const hasAnyData = Object.values(data).some(v => v !== undefined && v !== '');
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
@@ -451,31 +470,45 @@ export default function PersonalizationModal({ isOpen, onClose, onComplete }: Pe
         </div>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-gray-900 p-6 border-t border-gray-800 flex justify-between">
-          <button
-            onClick={() => step > 1 ? setStep(step - 1) : onClose()}
-            className="px-6 py-2 rounded-xl text-gray-400 hover:text-white transition-colors"
-          >
-            {step > 1 ? '← Back' : 'Skip'}
-          </button>
-          
-          {step < 3 ? (
+        <div className="sticky bottom-0 bg-gray-900 p-6 border-t border-gray-800">
+          <div className="flex justify-between items-center">
             <button
-              onClick={() => setStep(step + 1)}
-              disabled={!canProceed()}
-              className="btn-primary px-6 py-2 rounded-xl font-semibold text-white disabled:opacity-50"
+              onClick={() => step > 1 ? setStep(step - 1) : onClose()}
+              className="px-6 py-2 rounded-xl text-gray-400 hover:text-white transition-colors"
             >
-              Next →
+              {step > 1 ? '← Back' : 'Skip'}
             </button>
-          ) : (
-            <button
-              onClick={handleComplete}
-              disabled={!data.acceptedTerms}
-              className="btn-primary px-6 py-2 rounded-xl font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              ✨ See My Personal Stats
-            </button>
-          )}
+            
+            <div className="flex gap-2">
+              {/* Save & Close - always available if there's data */}
+              {hasAnyData && onSavePartial && (
+                <button
+                  onClick={handleSaveAndClose}
+                  className="px-4 py-2 rounded-xl text-gray-400 hover:text-white transition-colors border border-gray-700 hover:border-gray-600 text-sm"
+                >
+                  Save & Close
+                </button>
+              )}
+              
+              {step < 3 ? (
+                <button
+                  onClick={() => setStep(step + 1)}
+                  disabled={!canProceed()}
+                  className="btn-primary px-6 py-2 rounded-xl font-semibold text-white disabled:opacity-50"
+                >
+                  Next →
+                </button>
+              ) : (
+                <button
+                  onClick={handleComplete}
+                  disabled={!data.acceptedTerms}
+                  className="btn-primary px-6 py-2 rounded-xl font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  ✨ See My Personal Stats
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

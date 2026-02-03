@@ -107,6 +107,7 @@ export default function Home() {
   const [personalData, setPersonalData] = useState<PersonalData | null>(null);
   const [profileId, setProfileId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [showSavedToast, setShowSavedToast] = useState(false);
   const submitButtonRef = useRef<HTMLButtonElement>(null);
 
   // Load saved profile from localStorage on mount
@@ -130,6 +131,16 @@ export default function Home() {
           }, 100);
         }
       });
+    } else {
+      // Check for partial data (saved but not completed)
+      const partialData = localStorage.getItem('lifestats_partial_data');
+      if (partialData) {
+        try {
+          setPersonalData(JSON.parse(partialData));
+        } catch (e) {
+          console.error('Failed to parse partial data:', e);
+        }
+      }
     }
   }, []);
 
@@ -1129,13 +1140,32 @@ export default function Home() {
           </div>
         )}
 
+        {/* Saved Toast */}
+        {showSavedToast && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 transition-all">
+            <div className="bg-emerald-500 text-white px-6 py-3 rounded-xl shadow-lg flex items-center gap-2 animate-pulse">
+              <span>✓</span> Saved! Your data will be here when you return.
+            </div>
+          </div>
+        )}
+
         {/* Personalization Modal */}
         <PersonalizationModal
           isOpen={showPersonalization}
           onClose={() => setShowPersonalization(false)}
+          initialData={personalData}
+          onSavePartial={(data) => {
+            // Save partial progress to localStorage only (no Supabase until full completion)
+            setPersonalData(data);
+            localStorage.setItem('lifestats_partial_data', JSON.stringify(data));
+            setShowSavedToast(true);
+            setTimeout(() => setShowSavedToast(false), 3000);
+          }}
           onComplete={async (data) => {
             setPersonalData(data);
             setShowPersonalization(false);
+            // Clear partial data since we're completing
+            localStorage.removeItem('lifestats_partial_data');
             
             // Only save to Supabase on FIRST personalization (no existing profile)
             // This prevents duplicate entries when users explore different countries
@@ -1149,6 +1179,9 @@ export default function Home() {
                   setProfileId(newProfileId);
                   localStorage.setItem('lifestats_profile_id', newProfileId);
                   console.log('Profile saved:', newProfileId);
+                  // Show saved toast
+                  setShowSavedToast(true);
+                  setTimeout(() => setShowSavedToast(false), 3000);
                 }
               } catch (error) {
                 console.error('Failed to save profile:', error);
