@@ -621,17 +621,13 @@ export default function Home() {
 
             {/* Gender-Specific Stats (Premium) */}
             {genderStats && (
-              <div className="relative">
-                {/* Premium badge */}
-                <div className="absolute -top-2 -right-2 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10">
-                  ✨ PREMIUM
-                </div>
+              <CollapsibleSection 
+                title={`${gender === 'male' ? 'Male' : 'Female'} Stats`} 
+                icon={gender === 'male' ? '♂️' : '♀️'}
+                badge="✨ PREMIUM"
+                badgeColor="amber"
+              >
                 <div className="stat-card rounded-2xl p-6 border-2 border-amber-500/30">
-                  <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                    <span>{gender === 'male' ? '♂️' : '♀️'}</span> 
-                    {gender === 'male' ? 'Male' : 'Female'} Stats
-                  </h2>
-                  
                   {/* Adjusted stats */}
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                     <div className="bg-gray-800/50 rounded-xl p-4">
@@ -703,7 +699,7 @@ export default function Home() {
                     </div>
                   )}
                 </div>
-              </div>
+              </CollapsibleSection>
             )}
 
             {/* Cosmic Stats */}
