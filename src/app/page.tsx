@@ -483,9 +483,24 @@ export default function Home() {
               <div className="text-xs text-indigo-400 mt-2 animate-pulse">● counting live</div>
             </div>
 
-            {/* Tap hint */}
-            <div className="text-center text-sm text-gray-500">
-              💡 Tap any stat with ↻ to change units
+            {/* Tap hint + Country selector */}
+            <div className="flex items-center justify-center gap-4 text-sm text-gray-500">
+              <span>💡 Tap any stat with ↻ to change units</span>
+              <span className="text-gray-700">|</span>
+              <div className="flex items-center gap-2">
+                <span>{COUNTRY_PROFILES[country || 'us'].flag}</span>
+                <select
+                  value={country || 'us'}
+                  onChange={(e) => setCountry(e.target.value as Country)}
+                  className="bg-transparent border-none text-gray-400 text-sm cursor-pointer hover:text-white focus:outline-none"
+                >
+                  {Object.entries(COUNTRY_PROFILES).map(([code, profile]) => (
+                    <option key={code} value={code} className="bg-gray-900">
+                      {profile.flag} {profile.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
             {/* Personalization Prompt */}
