@@ -1,11 +1,16 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { calculateLifeStats, LifeStats } from '@/lib/calculations';
-import StatCard from '@/components/StatCard';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import { calculateLifeStats, LifeStats, formatDate, formatNumber } from '@/lib/calculations';
+import StatCard, { UnitOption } from '@/components/StatCard';
 import ProgressBar from '@/components/ProgressBar';
 import BirthdayCountdown from '@/components/BirthdayCountdown';
 import ShareCard from '@/components/ShareCard';
+
+// Conversion helpers
+function createUnits(conversions: { label: string; value: number; suffix?: string; decimals?: number }[]): UnitOption[] {
+  return conversions;
+}
 
 export default function Home() {
   const [birthday, setBirthday] = useState<string>('');
@@ -52,6 +57,94 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [birthdayDate]);
 
+  // Memoize unit conversions
+  const unitConversions = useMemo(() => {
+    if (!stats) return null;
+    
+    return {
+      // Time conversions
+      days: createUnits([
+        { label: 'Days Alive', value: stats.daysAlive, suffix: 'days' },
+        { label: 'Weeks Alive', value: stats.daysAlive / 7, suffix: 'weeks', decimals: 1 },
+        { label: 'Months Alive', value: stats.daysAlive / 30.44, suffix: 'months', decimals: 1 },
+      ]),
+      hours: createUnits([
+        { label: 'Hours Alive', value: stats.hoursAlive, suffix: 'hrs' },
+        { label: 'Days Alive', value: stats.hoursAlive / 24, suffix: 'days', decimals: 1 },
+      ]),
+      minutes: createUnits([
+        { label: 'Minutes Alive', value: stats.minutesAlive, suffix: 'min' },
+        { label: 'Hours Alive', value: stats.minutesAlive / 60, suffix: 'hrs', decimals: 1 },
+      ]),
+      
+      // Body conversions
+      heartbeats: createUnits([
+        { label: 'Heartbeats', value: stats.heartbeats },
+        { label: 'Heartbeats', value: stats.heartbeats / 1_000_000, suffix: 'million', decimals: 2 },
+        { label: 'Heartbeats', value: stats.heartbeats / 1_000_000_000, suffix: 'billion', decimals: 3 },
+      ]),
+      breaths: createUnits([
+        { label: 'Breaths Taken', value: stats.breaths },
+        { label: 'Breaths Taken', value: stats.breaths / 1_000_000, suffix: 'million', decimals: 2 },
+      ]),
+      blood: createUnits([
+        { label: 'Blood Pumped', value: stats.bloodPumpedGallons, suffix: 'gal' },
+        { label: 'Blood Pumped', value: stats.bloodPumpedGallons * 3.785, suffix: 'liters', decimals: 0 },
+        { label: 'Olympic Pools', value: stats.bloodPumpedGallons / 660_000, suffix: 'pools', decimals: 1 },
+      ]),
+      hair: createUnits([
+        { label: 'Hair Grown', value: stats.hairGrownInches, suffix: 'inches', decimals: 1 },
+        { label: 'Hair Grown', value: stats.hairGrownInches / 12, suffix: 'feet', decimals: 2 },
+        { label: 'Hair Grown', value: stats.hairGrownInches * 2.54, suffix: 'cm', decimals: 1 },
+        { label: 'Hair Grown', value: stats.hairGrownInches * 0.0254, suffix: 'meters', decimals: 2 },
+      ]),
+      skinCells: createUnits([
+        { label: 'Skin Cells Shed', value: stats.skinCellsShed },
+        { label: 'Skin Cells Shed', value: stats.skinCellsShed / 1_000_000_000_000, suffix: 'trillion', decimals: 1 },
+        { label: 'Bodies Worth', value: stats.skinCellsShed / 37_000_000_000_000, suffix: 'bodies', decimals: 2 },
+      ]),
+      dreams: createUnits([
+        { label: 'Dreams Had', value: stats.dreamsHad },
+        { label: 'Dreams Per Year', value: stats.dreamsHad / (stats.daysAlive / 365.25), suffix: '/year', decimals: 0 },
+      ]),
+      sleep: createUnits([
+        { label: 'Hours Slept', value: stats.sleepHours, suffix: 'hours' },
+        { label: 'Days Slept', value: stats.sleepHours / 24, suffix: 'days', decimals: 1 },
+        { label: 'Years Slept', value: stats.sleepHours / 24 / 365.25, suffix: 'years', decimals: 2 },
+      ]),
+      blinks: createUnits([
+        { label: 'Blinks', value: stats.blinks },
+        { label: 'Blinks', value: stats.blinks / 1_000_000, suffix: 'million', decimals: 1 },
+        { label: 'Blinks Per Day', value: stats.blinks / stats.daysAlive, suffix: '/day', decimals: 0 },
+      ]),
+      
+      // Cosmic conversions
+      milesThroughSpace: createUnits([
+        { label: 'Miles Through Space', value: stats.milesThroughSpace, suffix: 'mi' },
+        { label: 'Kilometers', value: stats.milesThroughSpace * 1.609, suffix: 'km', decimals: 0 },
+        { label: 'Astronomical Units', value: stats.milesThroughSpace / 93_000_000, suffix: 'AU', decimals: 2 },
+        { label: 'Light Hours', value: stats.milesThroughSpace / 671_000_000, suffix: 'light-hrs', decimals: 2 },
+      ]),
+      
+      // Life stats conversions
+      steps: createUnits([
+        { label: 'Steps Walked', value: stats.stepsWalked },
+        { label: 'Miles Walked', value: stats.stepsWalked / 2000, suffix: 'miles', decimals: 0 },
+        { label: 'Kilometers', value: stats.stepsWalked / 2000 * 1.609, suffix: 'km', decimals: 0 },
+        { label: 'Marathons', value: stats.stepsWalked / 2000 / 26.2, suffix: 'marathons', decimals: 1 },
+      ]),
+      meals: createUnits([
+        { label: 'Meals Eaten', value: stats.mealsEaten },
+        { label: 'Meals Per Year', value: stats.mealsEaten / (stats.daysAlive / 365.25), suffix: '/year', decimals: 0 },
+      ]),
+      words: createUnits([
+        { label: 'Words Spoken', value: stats.wordsSpoken },
+        { label: 'Words (Millions)', value: stats.wordsSpoken / 1_000_000, suffix: 'M', decimals: 1 },
+        { label: 'Avg Novels Worth', value: stats.wordsSpoken / 80000, suffix: 'novels', decimals: 0 },
+      ]),
+    };
+  }, [stats]);
+
   return (
     <main className="animated-bg min-h-screen">
       <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 md:py-16">
@@ -91,7 +184,7 @@ export default function Home() {
         )}
 
         {/* Stats Dashboard */}
-        {stats && birthdayDate && (
+        {stats && birthdayDate && unitConversions && (
           <div className="space-y-8 animate-fadeIn">
             {/* Reset Button */}
             <div className="text-center">
@@ -116,66 +209,150 @@ export default function Home() {
               <div className="text-xs text-indigo-400 mt-2 animate-pulse">● counting live</div>
             </div>
 
-            {/* Main Stats Grid */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-              <StatCard 
-                icon="📅" 
-                label="Days Alive" 
-                value={stats.daysAlive}
-                delay={1}
-              />
-              <StatCard 
-                icon="⏰" 
-                label="Hours Alive" 
-                value={stats.hoursAlive}
-                delay={2}
-              />
-              <StatCard 
-                icon="💓" 
-                label="Heartbeats" 
-                value={stats.heartbeats}
-                delay={3}
-              />
-              <StatCard 
-                icon="🌬️" 
-                label="Breaths Taken" 
-                value={stats.breaths}
-                delay={4}
-              />
-              <StatCard 
-                icon="🌙" 
-                label="Full Moons" 
-                value={stats.fullMoons}
-                delay={5}
-                showFull
-              />
-              <StatCard 
-                icon="🌍" 
-                label="Earth Orbits" 
-                value={stats.earthOrbits}
-                delay={6}
-                decimals={2}
-              />
-              <StatCard 
-                icon="🍂" 
-                label="Seasons" 
-                value={stats.seasonsExperienced}
-                delay={7}
-                showFull
-              />
-              <StatCard 
-                icon="😴" 
-                label="Hours Slept" 
-                value={stats.sleepHours}
-                delay={8}
-              />
-              <StatCard 
-                icon="👁️" 
-                label="Blinks" 
-                value={stats.blinks}
-                delay={9}
-              />
+            {/* Tap hint */}
+            <div className="text-center text-sm text-gray-500">
+              💡 Tap any stat with ↻ to change units
             </div>
+
+            {/* Milestone Badges */}
+            {(stats.isInBillionClub || stats.isIn10kClub) && (
+              <div className="flex flex-wrap justify-center gap-3">
+                {stats.isInBillionClub && (
+                  <div className="stat-card rounded-full px-6 py-3 flex items-center gap-2 border-2 border-yellow-500/50">
+                    <span className="text-2xl">🏆</span>
+                    <span className="text-yellow-300 font-bold">BILLION SECONDS CLUB</span>
+                  </div>
+                )}
+                {stats.isIn10kClub && (
+                  <div className="stat-card rounded-full px-6 py-3 flex items-center gap-2 border-2 border-emerald-500/50">
+                    <span className="text-2xl">🎯</span>
+                    <span className="text-emerald-300 font-bold">10,000 DAYS CLUB</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Time Stats */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>⏱️</span> Time Alive
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatCard icon="📅" label="Days" value={stats.daysAlive} delay={1} units={unitConversions.days} />
+                <StatCard icon="⏰" label="Hours" value={stats.hoursAlive} delay={2} units={unitConversions.hours} />
+                <StatCard icon="⏱️" label="Minutes" value={stats.minutesAlive} delay={3} units={unitConversions.minutes} />
+                <StatCard icon="🌅" label="Sunrises" value={stats.sunrisesWitnessed} delay={4} />
+              </div>
+            </div>
+
+            {/* Body Stats */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>🧬</span> Your Body
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatCard icon="💓" label="Heartbeats" value={stats.heartbeats} delay={5} units={unitConversions.heartbeats} />
+                <StatCard icon="🌬️" label="Breaths" value={stats.breaths} delay={6} units={unitConversions.breaths} />
+                <StatCard icon="👁️" label="Blinks" value={stats.blinks} delay={7} units={unitConversions.blinks} />
+                <StatCard icon="🩸" label="Blood Pumped" value={stats.bloodPumpedGallons} delay={8} units={unitConversions.blood} />
+                <StatCard icon="💇" label="Hair Grown" value={stats.hairGrownInches} delay={9} units={unitConversions.hair} />
+                <StatCard icon="✨" label="Skin Cells Shed" value={stats.skinCellsShed} delay={10} units={unitConversions.skinCells} />
+                <StatCard icon="💭" label="Dreams Had" value={stats.dreamsHad} delay={11} units={unitConversions.dreams} />
+                <StatCard icon="😴" label="Hours Slept" value={stats.sleepHours} delay={12} units={unitConversions.sleep} />
+              </div>
+            </div>
+
+            {/* Cosmic Stats */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>🚀</span> Cosmic Journey
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <StatCard icon="🌍" label="Earth Orbits" value={stats.earthOrbits} delay={13} decimals={2} />
+                <StatCard icon="🌙" label="Full Moons" value={stats.fullMoons} delay={14} showFull />
+                <StatCard icon="🍂" label="Seasons" value={stats.seasonsExperienced} delay={15} showFull />
+                <StatCard icon="🌑" label="Solar Eclipses" value={stats.solarEclipses} delay={16} showFull />
+                <div className="col-span-2">
+                  <StatCard icon="🚀" label="Miles Through Space" value={stats.milesThroughSpace} delay={17} units={unitConversions.milesThroughSpace} />
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                * Earth travels 1.6 million miles per day around the Sun. You&apos;ve been along for the ride!
+              </p>
+            </div>
+
+            {/* World Context */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>🌍</span> Your World
+              </h2>
+              <div className="stat-card rounded-2xl p-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <div className="text-sm text-gray-400 mb-1">World Population When You Were Born</div>
+                    <div className="text-2xl font-bold text-white">{formatNumber(stats.worldPopulationAtBirth)}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-400 mb-1">World Population Now</div>
+                    <div className="text-2xl font-bold text-white">{formatNumber(stats.worldPopulationNow)}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-400 mb-1">People Added During Your Lifetime</div>
+                    <div className="text-2xl font-bold text-emerald-400">+{formatNumber(stats.populationGrowth)}</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-400 mb-1">% of Recorded Human History</div>
+                    <div className="text-2xl font-bold text-purple-400">{stats.percentOfRecordedHistory.toFixed(3)}%</div>
+                    <div className="text-xs text-gray-500">of ~5,000 years since writing</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Upcoming Milestones */}
+            {(stats.daysUntil10k || stats.daysUntilBillionSeconds) && (
+              <div>
+                <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                  <span>🎯</span> Upcoming Milestones
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {stats.daysUntilBillionSeconds && stats.billionSecondsDate && (
+                    <div className="stat-card rounded-2xl p-6 border-2 border-yellow-500/30">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-3xl">🏆</span>
+                        <div>
+                          <div className="font-bold text-yellow-300">Billion Seconds Club</div>
+                          <div className="text-sm text-gray-400">The exclusive 31.7-year milestone</div>
+                        </div>
+                      </div>
+                      <div className="text-3xl font-bold text-white mb-1">
+                        {stats.daysUntilBillionSeconds.toLocaleString()} days
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        📅 {formatDate(stats.billionSecondsDate)}
+                      </div>
+                    </div>
+                  )}
+                  {stats.daysUntil10k && stats.tenThousandDaysDate && (
+                    <div className="stat-card rounded-2xl p-6 border-2 border-emerald-500/30">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span className="text-3xl">🎯</span>
+                        <div>
+                          <div className="font-bold text-emerald-300">10,000 Days Club</div>
+                          <div className="text-sm text-gray-400">The ~27.4-year milestone</div>
+                        </div>
+                      </div>
+                      <div className="text-3xl font-bold text-white mb-1">
+                        {stats.daysUntil10k.toLocaleString()} days
+                      </div>
+                      <div className="text-sm text-gray-400">
+                        📅 {formatDate(stats.tenThousandDaysDate)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Lifespan Progress */}
             <ProgressBar 
@@ -197,7 +374,8 @@ export default function Home() {
               <ul className="space-y-3 text-gray-300">
                 <li className="flex items-start gap-2">
                   <span className="text-indigo-400">•</span>
-                  You&apos;ve walked approximately <span className="text-white font-semibold">{(stats.stepsWalked).toLocaleString()}</span> steps
+                  You&apos;ve walked approximately <span className="text-white font-semibold">{stats.stepsWalked.toLocaleString()}</span> steps
+                  ({Math.floor(stats.stepsWalked / 2000).toLocaleString()} miles)
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-purple-400">•</span>
@@ -205,9 +383,21 @@ export default function Home() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="text-pink-400">•</span>
-                  You&apos;ve spoken roughly <span className="text-white font-semibold">{(stats.wordsSpoken / 1000000).toFixed(1)}M</span> words
+                  You&apos;ve spoken roughly <span className="text-white font-semibold">{(stats.wordsSpoken / 1000000).toFixed(1)}M</span> words — enough for <span className="text-white font-semibold">{Math.floor(stats.wordsSpoken / 80000).toLocaleString()}</span> novels!
                 </li>
-                {stats.secondsAlive >= 1_000_000_000 && (
+                <li className="flex items-start gap-2">
+                  <span className="text-cyan-400">•</span>
+                  Your hair has grown <span className="text-white font-semibold">{(stats.hairGrownInches / 12).toFixed(1)} feet</span> total
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-amber-400">•</span>
+                  You&apos;ve slept for <span className="text-white font-semibold">{(stats.sleepHours / 24 / 365.25).toFixed(1)} years</span> of your life
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-emerald-400">•</span>
+                  Your heart has pumped enough blood to fill <span className="text-white font-semibold">{Math.floor(stats.bloodPumpedGallons / 660_000).toLocaleString()}</span> Olympic swimming pools!
+                </li>
+                {stats.isInBillionClub && (
                   <li className="flex items-start gap-2">
                     <span className="text-yellow-400">🏆</span>
                     <span className="text-yellow-300 font-semibold">You&apos;ve been alive for over 1 BILLION seconds!</span>
