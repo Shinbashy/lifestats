@@ -181,6 +181,15 @@ export default function Home() {
                 className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white text-lg focus:outline-none focus:border-indigo-500 transition-colors"
                 max={new Date().toISOString().split('T')[0]}
                 required
+                tabIndex={1}
+              />
+              
+              {/* Focus trap - catches Tab after date input */}
+              <span
+                tabIndex={2}
+                onFocus={() => document.getElementById('gender-male')?.focus()}
+                className="sr-only"
+                aria-hidden="true"
               />
               
               {/* Gender selector - Premium feature */}
@@ -190,7 +199,9 @@ export default function Home() {
                 </label>
                 <div className="flex gap-3">
                   <button
+                    id="gender-male"
                     type="button"
+                    tabIndex={3}
                     onClick={() => setGender(gender === 'male' ? null : 'male')}
                     className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
                       gender === 'male'
@@ -201,7 +212,9 @@ export default function Home() {
                     ♂️ Male
                   </button>
                   <button
+                    id="gender-female"
                     type="button"
+                    tabIndex={4}
                     onClick={() => setGender(gender === 'female' ? null : 'female')}
                     className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
                       gender === 'female'
@@ -213,16 +226,9 @@ export default function Home() {
                   </button>
                 </div>
               </div>
-              
-              {/* Focus trap - catches Tab after date input and redirects to button */}
-              <span
-                tabIndex={0}
-                onFocus={() => submitButtonRef.current?.focus()}
-                className="sr-only"
-                aria-hidden="true"
-              />
               <button
                 ref={submitButtonRef}
+                tabIndex={5}
                 type="submit"
                 className="btn-primary w-full mt-4 py-3 rounded-xl font-semibold text-white text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
               >
