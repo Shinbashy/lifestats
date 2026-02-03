@@ -4,6 +4,7 @@ export type Country = 'us' | 'jp' | 'uk' | 'de' | 'au' | 'ca' | 'fr' | 'kr' | nu
 export interface CountryProfile {
   name: string;
   flag: string;
+  lifeExpectancy: number;
   stepsPerDay: number;
   transitMinutesPerDay: number;
   drivingMinutesPerDay: number;
@@ -20,6 +21,7 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
   us: {
     name: 'United States',
     flag: '🇺🇸',
+    lifeExpectancy: 77,
     stepsPerDay: 5000,
     transitMinutesPerDay: 10,
     drivingMinutesPerDay: 50,
@@ -34,6 +36,7 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
   jp: {
     name: 'Japan',
     flag: '🇯🇵',
+    lifeExpectancy: 84,
     stepsPerDay: 8500,
     transitMinutesPerDay: 60,
     drivingMinutesPerDay: 15,
@@ -48,6 +51,7 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
   uk: {
     name: 'United Kingdom',
     flag: '🇬🇧',
+    lifeExpectancy: 81,
     stepsPerDay: 6500,
     transitMinutesPerDay: 35,
     drivingMinutesPerDay: 25,
@@ -62,6 +66,7 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
   de: {
     name: 'Germany',
     flag: '🇩🇪',
+    lifeExpectancy: 81,
     stepsPerDay: 7000,
     transitMinutesPerDay: 40,
     drivingMinutesPerDay: 30,
@@ -76,6 +81,7 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
   au: {
     name: 'Australia',
     flag: '🇦🇺',
+    lifeExpectancy: 83,
     stepsPerDay: 5500,
     transitMinutesPerDay: 20,
     drivingMinutesPerDay: 45,
@@ -90,6 +96,7 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
   ca: {
     name: 'Canada',
     flag: '🇨🇦',
+    lifeExpectancy: 82,
     stepsPerDay: 5200,
     transitMinutesPerDay: 25,
     drivingMinutesPerDay: 45,
@@ -104,6 +111,7 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
   fr: {
     name: 'France',
     flag: '🇫🇷',
+    lifeExpectancy: 82,
     stepsPerDay: 7200,
     transitMinutesPerDay: 35,
     drivingMinutesPerDay: 25,
@@ -118,6 +126,7 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
   kr: {
     name: 'South Korea',
     flag: '🇰🇷',
+    lifeExpectancy: 83,
     stepsPerDay: 8000,
     transitMinutesPerDay: 55,
     drivingMinutesPerDay: 20,
@@ -354,8 +363,9 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date(), count
   // Seasons (4 per year)
   const seasonsExperienced = Math.floor(earthOrbits * 4);
   
-  // Lifespan percentage
-  const averageLifespanMs = AVERAGE_LIFESPAN_YEARS * 365.25 * 24 * 60 * 60 * 1000;
+  // Lifespan percentage (country-adjusted)
+  const countryLifeExpectancy = profile.lifeExpectancy;
+  const averageLifespanMs = countryLifeExpectancy * 365.25 * 24 * 60 * 60 * 1000;
   const lifespanPercentage = (msAlive / averageLifespanMs) * 100;
   
   // Days until next birthday
