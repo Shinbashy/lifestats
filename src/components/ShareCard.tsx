@@ -113,27 +113,31 @@ export default function ShareCard({ stats, birthday }: ShareCardProps) {
   const mercuryAge = Math.floor(stats.planetaryAges.find(p => p.name === 'Mercury')?.age || 0);
   const singleStat = getStatValue();
 
-  // Template styles
-  const templateStyles: Record<CardTemplate, { bg: string; text: string; accent: string }> = {
+  // Template styles - using inline styles for html2canvas compatibility (avoids CSS lab() colors)
+  const templateStyles: Record<CardTemplate, { bgStyle: React.CSSProperties; textColor: string; accentColor: string; boxBg: string }> = {
     minimal: {
-      bg: 'bg-gray-950 border border-gray-800',
-      text: 'text-white',
-      accent: 'text-gray-400',
+      bgStyle: { backgroundColor: '#030712', border: '1px solid #1f2937' },
+      textColor: '#ffffff',
+      accentColor: '#9ca3af',
+      boxBg: 'rgba(255,255,255,0.1)',
     },
     bold: {
-      bg: 'bg-gradient-to-br from-rose-600 via-orange-500 to-yellow-500',
-      text: 'text-white',
-      accent: 'text-white/80',
+      bgStyle: { background: 'linear-gradient(to bottom right, #e11d48, #f97316, #eab308)' },
+      textColor: '#ffffff',
+      accentColor: 'rgba(255,255,255,0.8)',
+      boxBg: 'rgba(255,255,255,0.15)',
     },
     cosmic: {
-      bg: 'bg-gradient-to-br from-gray-900 via-indigo-950 to-purple-950 border border-indigo-500/30',
-      text: 'text-white',
-      accent: 'text-indigo-300',
+      bgStyle: { background: 'linear-gradient(to bottom right, #111827, #1e1b4b, #3b0764)', border: '1px solid rgba(99,102,241,0.3)' },
+      textColor: '#ffffff',
+      accentColor: '#a5b4fc',
+      boxBg: 'rgba(255,255,255,0.1)',
     },
     retro: {
-      bg: 'bg-gradient-to-br from-teal-900 via-emerald-900 to-cyan-900 border-2 border-emerald-400/50',
-      text: 'text-emerald-100',
-      accent: 'text-emerald-400',
+      bgStyle: { background: 'linear-gradient(to bottom right, #134e4a, #064e3b, #164e63)', border: '2px solid rgba(52,211,153,0.5)' },
+      textColor: '#d1fae5',
+      accentColor: '#34d399',
+      boxBg: 'rgba(255,255,255,0.1)',
     },
   };
 
@@ -219,26 +223,26 @@ export default function ShareCard({ stats, birthday }: ShareCardProps) {
             </div>
           </div>
 
-          {/* Card Preview */}
+          {/* Card Preview - using inline styles for html2canvas compatibility */}
           <div 
             ref={cardRef}
-            className={`share-card rounded-2xl p-8 max-w-md mx-auto ${style.bg}`}
-            style={{ width: '400px', minHeight: '400px' }}
+            className="rounded-2xl p-8 max-w-md mx-auto"
+            style={{ width: '400px', minHeight: '400px', ...style.bgStyle }}
           >
             {/* Single stat card */}
             {singleStat ? (
               <div className="flex flex-col items-center justify-center h-full text-center py-8">
                 <div className="text-6xl mb-4">{singleStat.icon}</div>
-                <div className={`text-5xl font-black mb-2 ${style.text}`}>
+                <div className="text-5xl font-black mb-2" style={{ color: style.textColor }}>
                   {singleStat.value}
                 </div>
-                <div className={`text-lg ${style.accent}`}>
+                <div className="text-lg" style={{ color: style.accentColor }}>
                   {singleStat.label}
                 </div>
-                <div className={`text-sm mt-4 ${style.accent}`}>
+                <div className="text-sm mt-4" style={{ color: style.accentColor }}>
                   in {age} years on Earth
                 </div>
-                <div className={`mt-8 text-xs ${style.accent} opacity-70`}>
+                <div className="mt-8 text-xs" style={{ color: style.accentColor, opacity: 0.7 }}>
                   lifestats-eight.vercel.app
                 </div>
               </div>
@@ -246,55 +250,55 @@ export default function ShareCard({ stats, birthday }: ShareCardProps) {
               /* Overview card */
               <>
                 <div className="text-center mb-6">
-                  <h3 className={`text-2xl font-bold mb-2 ${style.text}`}>My Life in Numbers</h3>
-                  <p className={`text-sm ${style.accent}`}>
+                  <h3 className="text-2xl font-bold mb-2" style={{ color: style.textColor }}>My Life in Numbers</h3>
+                  <p className="text-sm" style={{ color: style.accentColor }}>
                     {age} Earth years • {mercuryAge} Mercury years
                   </p>
                 </div>
                 
                 <div className="grid grid-cols-2 gap-3 text-center">
-                  <div className="bg-white/10 rounded-xl p-3">
+                  <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
                     <div className="text-xl mb-1">💓</div>
-                    <div className={`text-lg font-bold ${style.text}`}>{formatNumber(stats.heartbeats)}</div>
-                    <div className={`text-[10px] ${style.accent}`}>heartbeats</div>
+                    <div className="text-lg font-bold" style={{ color: style.textColor }}>{formatNumber(stats.heartbeats)}</div>
+                    <div className="text-[10px]" style={{ color: style.accentColor }}>heartbeats</div>
                   </div>
-                  <div className="bg-white/10 rounded-xl p-3">
+                  <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
                     <div className="text-xl mb-1">🌬️</div>
-                    <div className={`text-lg font-bold ${style.text}`}>{formatNumber(stats.breaths)}</div>
-                    <div className={`text-[10px] ${style.accent}`}>breaths</div>
+                    <div className="text-lg font-bold" style={{ color: style.textColor }}>{formatNumber(stats.breaths)}</div>
+                    <div className="text-[10px]" style={{ color: style.accentColor }}>breaths</div>
                   </div>
-                  <div className="bg-white/10 rounded-xl p-3">
+                  <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
                     <div className="text-xl mb-1">🌙</div>
-                    <div className={`text-lg font-bold ${style.text}`}>{stats.fullMoons}</div>
-                    <div className={`text-[10px] ${style.accent}`}>full moons</div>
+                    <div className="text-lg font-bold" style={{ color: style.textColor }}>{stats.fullMoons}</div>
+                    <div className="text-[10px]" style={{ color: style.accentColor }}>full moons</div>
                   </div>
-                  <div className="bg-white/10 rounded-xl p-3">
+                  <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
                     <div className="text-xl mb-1">🚀</div>
-                    <div className={`text-lg font-bold ${style.text}`}>{formatNumber(stats.milesThroughSpace)}</div>
-                    <div className={`text-[10px] ${style.accent}`}>miles in space</div>
+                    <div className="text-lg font-bold" style={{ color: style.textColor }}>{formatNumber(stats.milesThroughSpace)}</div>
+                    <div className="text-[10px]" style={{ color: style.accentColor }}>miles in space</div>
                   </div>
                 </div>
 
                 {/* Planetary ages mini */}
-                <div className="mt-4 bg-white/10 rounded-xl p-3">
-                  <div className={`text-xs ${style.accent} mb-2 text-center`}>Age on Other Planets</div>
+                <div className="mt-4 rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
+                  <div className="text-xs mb-2 text-center" style={{ color: style.accentColor }}>Age on Other Planets</div>
                   <div className="flex justify-center gap-4 text-center">
                     {stats.planetaryAges.slice(0, 4).map(planet => (
                       <div key={planet.name} className="text-center">
                         <div className="text-sm">{planet.emoji}</div>
-                        <div className={`text-xs font-bold ${style.text}`}>{Math.floor(planet.age)}</div>
+                        <div className="text-xs font-bold" style={{ color: style.textColor }}>{Math.floor(planet.age)}</div>
                       </div>
                     ))}
                   </div>
                 </div>
 
                 <div className="mt-4 text-center">
-                  <div className="inline-block bg-white/20 px-4 py-1.5 rounded-full text-xs font-semibold">
+                  <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: style.textColor }}>
                     {stats.lifespanPercentage.toFixed(1)}% of journey complete
                   </div>
                 </div>
 
-                <div className={`mt-4 text-center text-[10px] ${style.accent} opacity-70`}>
+                <div className="mt-4 text-center text-[10px]" style={{ color: style.accentColor, opacity: 0.7 }}>
                   lifestats-eight.vercel.app
                 </div>
               </>
