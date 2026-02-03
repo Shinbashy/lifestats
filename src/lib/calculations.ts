@@ -34,6 +34,11 @@ export interface LifeStats {
   hairGrownInches: number;
   skinCellsShed: number;
   dreamsHad: number;
+  fingernailsGrownInches: number;
+  timesLaughed: number;
+  sneezes: number;
+  toiletHours: number;
+  bloodRecycles: number;
   
   // Cosmic
   fullMoons: number;
@@ -42,11 +47,35 @@ export interface LifeStats {
   sunrisesWitnessed: number;
   milesThroughSpace: number;
   solarEclipses: number;
+  leapYears: number;
   
   // Life
   mealsEaten: number;
   wordsSpoken: number;
   stepsWalked: number;
+  
+  // Digital (post-internet era)
+  googleSearches: number;
+  emailsSent: number;
+  photosTaken: number;
+  hoursOfVideoWatched: number;
+  
+  // Consumption
+  chickensConsumed: number;
+  cowsWorthOfBeef: number;
+  pizzasEaten: number;
+  gallonsOfWaterDrunk: number;
+  cupsOfCoffee: number;
+  
+  // Time Spent
+  hoursAtRedLights: number;
+  hoursEating: number;
+  hoursShowering: number;
+  
+  // World Events
+  usPresidents: string[];
+  olympicsHeld: number;
+  worldCups: number;
   
   // World Context
   worldPopulationAtBirth: number;
@@ -76,6 +105,51 @@ const MEALS_PER_DAY = 3;
 const WORDS_PER_DAY = 16000;
 const STEPS_PER_DAY = 7500;
 const BLINKS_PER_DAY = 15000;
+
+// New body constants
+const FINGERNAIL_INCHES_PER_YEAR = 1.5; // ~3.5mm/month
+const LAUGHS_PER_DAY = 15;
+const SNEEZES_PER_YEAR = 200;
+const TOILET_MINUTES_PER_DAY = 30; // ~3 years over lifetime
+const BLOOD_RECYCLES_PER_DAY = 1440; // Full cycle every minute
+
+// Digital era constants
+const GOOGLE_SEARCHES_PER_DAY = 8; // Average since widespread adoption
+const EMAILS_PER_DAY = 40; // Sent + received average
+const PHOTOS_PER_DAY_SMARTPHONE = 3; // Since smartphone era (~2010)
+const VIDEO_HOURS_PER_DAY = 2.5; // YouTube/streaming average
+
+// Consumption constants
+const CHICKENS_PER_YEAR = 28; // US average
+const BEEF_LBS_PER_YEAR = 57; // US average
+const COW_BEEF_LBS = 440; // Retail beef from one cow
+const PIZZAS_PER_YEAR = 46; // US average
+const WATER_GALLONS_PER_DAY = 0.5; // Drinking water
+const COFFEE_CUPS_PER_DAY = 2.7; // US average (for coffee drinkers, ~18+)
+
+// Time spent constants
+const RED_LIGHT_MINUTES_PER_DAY = 5; // For drivers
+const EATING_MINUTES_PER_DAY = 67;
+const SHOWER_MINUTES_PER_DAY = 8;
+
+// US Presidents with inauguration years
+const US_PRESIDENTS: { name: string; start: number; end: number }[] = [
+  { name: 'Harry S. Truman', start: 1945, end: 1953 },
+  { name: 'Dwight D. Eisenhower', start: 1953, end: 1961 },
+  { name: 'John F. Kennedy', start: 1961, end: 1963 },
+  { name: 'Lyndon B. Johnson', start: 1963, end: 1969 },
+  { name: 'Richard Nixon', start: 1969, end: 1974 },
+  { name: 'Gerald Ford', start: 1974, end: 1977 },
+  { name: 'Jimmy Carter', start: 1977, end: 1981 },
+  { name: 'Ronald Reagan', start: 1981, end: 1989 },
+  { name: 'George H. W. Bush', start: 1989, end: 1993 },
+  { name: 'Bill Clinton', start: 1993, end: 2001 },
+  { name: 'George W. Bush', start: 2001, end: 2009 },
+  { name: 'Barack Obama', start: 2009, end: 2017 },
+  { name: 'Donald Trump', start: 2017, end: 2021 },
+  { name: 'Joe Biden', start: 2021, end: 2025 },
+  { name: 'Donald Trump', start: 2025, end: 2029 },
+];
 
 // New constants
 const BLOOD_GALLONS_PER_DAY = 2000; // Heart pumps ~2000 gallons/day
@@ -163,16 +237,68 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date()): Life
   const hairGrownInches = Math.round(yearsAlive * HAIR_INCHES_PER_YEAR * 10) / 10;
   const skinCellsShed = Math.floor(daysAlive * SKIN_CELLS_PER_DAY);
   const dreamsHad = Math.floor(daysAlive * DREAMS_PER_NIGHT);
+  const fingernailsGrownInches = Math.round(yearsAlive * FINGERNAIL_INCHES_PER_YEAR * 10) / 10;
+  const timesLaughed = Math.floor(daysAlive * LAUGHS_PER_DAY);
+  const sneezes = Math.floor(yearsAlive * SNEEZES_PER_YEAR);
+  const toiletHours = Math.floor(daysAlive * TOILET_MINUTES_PER_DAY / 60);
+  const bloodRecycles = Math.floor(daysAlive * BLOOD_RECYCLES_PER_DAY);
   
   // Cosmic stats
   const sunrisesWitnessed = daysAlive;
   const milesThroughSpace = Math.floor(daysAlive * MILES_PER_DAY_THROUGH_SPACE);
   const solarEclipses = Math.floor(yearsAlive * SOLAR_ECLIPSES_PER_YEAR);
   
+  // Leap years
+  const birthYearNum = birthday.getFullYear();
+  const currentYearNum = now.getFullYear();
+  let leapYears = 0;
+  for (let y = birthYearNum; y <= currentYearNum; y++) {
+    if ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) {
+      leapYears++;
+    }
+  }
+  
   // Life stats
   const mealsEaten = Math.floor(daysAlive * MEALS_PER_DAY);
   const wordsSpoken = Math.floor(daysAlive * WORDS_PER_DAY);
   const stepsWalked = Math.floor(daysAlive * STEPS_PER_DAY);
+  
+  // Digital stats (era-aware)
+  const GOOGLE_START = 1998;
+  const SMARTPHONE_ERA = 2010;
+  const googleYears = Math.max(0, currentYearNum - Math.max(birthYearNum, GOOGLE_START));
+  const smartphoneYears = Math.max(0, currentYearNum - Math.max(birthYearNum, SMARTPHONE_ERA));
+  
+  const googleSearches = Math.floor(googleYears * 365.25 * GOOGLE_SEARCHES_PER_DAY);
+  const emailsSent = Math.floor(googleYears * 365.25 * EMAILS_PER_DAY);
+  const photosTaken = Math.floor(smartphoneYears * 365.25 * PHOTOS_PER_DAY_SMARTPHONE);
+  const hoursOfVideoWatched = Math.floor(smartphoneYears * 365.25 * VIDEO_HOURS_PER_DAY);
+  
+  // Consumption stats
+  const chickensConsumed = Math.floor(yearsAlive * CHICKENS_PER_YEAR);
+  const cowsWorthOfBeef = Math.round((yearsAlive * BEEF_LBS_PER_YEAR / COW_BEEF_LBS) * 100) / 100;
+  const pizzasEaten = Math.floor(yearsAlive * PIZZAS_PER_YEAR);
+  const gallonsOfWaterDrunk = Math.floor(daysAlive * WATER_GALLONS_PER_DAY);
+  // Coffee only counts from age 18
+  const coffeeYears = Math.max(0, yearsAlive - 18);
+  const cupsOfCoffee = Math.floor(coffeeYears * 365.25 * COFFEE_CUPS_PER_DAY);
+  
+  // Time spent stats (assuming adult with car for red lights, age 16+)
+  const drivingYears = Math.max(0, yearsAlive - 16);
+  const hoursAtRedLights = Math.floor(drivingYears * 365.25 * RED_LIGHT_MINUTES_PER_DAY / 60);
+  const hoursEating = Math.floor(daysAlive * EATING_MINUTES_PER_DAY / 60);
+  const hoursShowering = Math.floor(daysAlive * SHOWER_MINUTES_PER_DAY / 60);
+  
+  // US Presidents during lifetime
+  const usPresidents = US_PRESIDENTS
+    .filter(p => p.start <= currentYearNum && p.end >= birthYearNum)
+    .map(p => p.name);
+  
+  // Olympics (Summer, every 4 years, skipped 2020 to 2021)
+  const olympicsHeld = Math.floor((currentYearNum - Math.max(birthYearNum, 1896)) / 4);
+  
+  // FIFA World Cup (every 4 years since 1930)
+  const worldCups = Math.floor((currentYearNum - Math.max(birthYearNum, 1930)) / 4);
   
   // World context
   const birthYear = birthday.getFullYear();
@@ -220,6 +346,11 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date()): Life
     hairGrownInches,
     skinCellsShed,
     dreamsHad,
+    fingernailsGrownInches,
+    timesLaughed,
+    sneezes,
+    toiletHours,
+    bloodRecycles,
     
     // Cosmic
     fullMoons,
@@ -228,11 +359,35 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date()): Life
     sunrisesWitnessed,
     milesThroughSpace,
     solarEclipses,
+    leapYears,
     
     // Life
     mealsEaten,
     wordsSpoken,
     stepsWalked,
+    
+    // Digital
+    googleSearches,
+    emailsSent,
+    photosTaken,
+    hoursOfVideoWatched,
+    
+    // Consumption
+    chickensConsumed,
+    cowsWorthOfBeef,
+    pizzasEaten,
+    gallonsOfWaterDrunk,
+    cupsOfCoffee,
+    
+    // Time Spent
+    hoursAtRedLights,
+    hoursEating,
+    hoursShowering,
+    
+    // World Events
+    usPresidents,
+    olympicsHeld,
+    worldCups,
     
     // World Context
     worldPopulationAtBirth,

@@ -151,6 +151,63 @@ export default function Home() {
         { label: 'Words (Millions)', value: stats.wordsSpoken / 1_000_000, suffix: 'M', decimals: 1 },
         { label: 'Avg Novels Worth', value: stats.wordsSpoken / 80000, suffix: 'novels', decimals: 0 },
       ]),
+      
+      // New body conversions
+      fingernails: createUnits([
+        { label: 'Fingernails Grown', value: stats.fingernailsGrownInches, suffix: 'inches', decimals: 1 },
+        { label: 'Fingernails Grown', value: stats.fingernailsGrownInches / 12, suffix: 'feet', decimals: 2 },
+        { label: 'Fingernails Grown', value: stats.fingernailsGrownInches * 2.54, suffix: 'cm', decimals: 1 },
+      ]),
+      toilet: createUnits([
+        { label: 'Toilet Time', value: stats.toiletHours, suffix: 'hours' },
+        { label: 'Toilet Time', value: stats.toiletHours / 24, suffix: 'days', decimals: 1 },
+        { label: 'Toilet Time', value: stats.toiletHours / 24 / 365.25, suffix: 'years', decimals: 2 },
+      ]),
+      
+      // Digital conversions
+      googleSearches: createUnits([
+        { label: 'Google Searches', value: stats.googleSearches },
+        { label: 'Google Searches', value: stats.googleSearches / 1000, suffix: 'K', decimals: 1 },
+      ]),
+      emails: createUnits([
+        { label: 'Emails', value: stats.emailsSent },
+        { label: 'Emails', value: stats.emailsSent / 1000, suffix: 'K', decimals: 1 },
+      ]),
+      photos: createUnits([
+        { label: 'Photos Taken', value: stats.photosTaken },
+        { label: 'Photos Taken', value: stats.photosTaken / 1000, suffix: 'K', decimals: 1 },
+      ]),
+      videoHours: createUnits([
+        { label: 'Video Watched', value: stats.hoursOfVideoWatched, suffix: 'hours' },
+        { label: 'Video Watched', value: stats.hoursOfVideoWatched / 24, suffix: 'days', decimals: 1 },
+        { label: 'Video Watched', value: stats.hoursOfVideoWatched / 24 / 30, suffix: 'months', decimals: 1 },
+      ]),
+      
+      // Consumption conversions
+      water: createUnits([
+        { label: 'Water Drunk', value: stats.gallonsOfWaterDrunk, suffix: 'gallons' },
+        { label: 'Water Drunk', value: stats.gallonsOfWaterDrunk * 3.785, suffix: 'liters', decimals: 0 },
+        { label: 'Bathtubs', value: stats.gallonsOfWaterDrunk / 80, suffix: 'bathtubs', decimals: 1 },
+      ]),
+      coffee: createUnits([
+        { label: 'Cups of Coffee', value: stats.cupsOfCoffee },
+        { label: 'Gallons of Coffee', value: stats.cupsOfCoffee / 16, suffix: 'gallons', decimals: 0 },
+      ]),
+      
+      // Time spent conversions
+      eating: createUnits([
+        { label: 'Time Eating', value: stats.hoursEating, suffix: 'hours' },
+        { label: 'Time Eating', value: stats.hoursEating / 24, suffix: 'days', decimals: 1 },
+        { label: 'Time Eating', value: stats.hoursEating / 24 / 365.25, suffix: 'years', decimals: 2 },
+      ]),
+      showering: createUnits([
+        { label: 'Time Showering', value: stats.hoursShowering, suffix: 'hours' },
+        { label: 'Time Showering', value: stats.hoursShowering / 24, suffix: 'days', decimals: 1 },
+      ]),
+      redLights: createUnits([
+        { label: 'At Red Lights', value: stats.hoursAtRedLights, suffix: 'hours' },
+        { label: 'At Red Lights', value: stats.hoursAtRedLights / 24, suffix: 'days', decimals: 1 },
+      ]),
     };
   }, [stats]);
 
@@ -313,9 +370,14 @@ export default function Home() {
                 <StatCard icon="👁️" label="Blinks" value={stats.blinks} delay={7} units={unitConversions.blinks} />
                 <StatCard icon="🩸" label="Blood Pumped" value={stats.bloodPumpedGallons} delay={8} units={unitConversions.blood} />
                 <StatCard icon="💇" label="Hair Grown" value={stats.hairGrownInches} delay={9} units={unitConversions.hair} />
-                <StatCard icon="✨" label="Skin Cells Shed" value={stats.skinCellsShed} delay={10} units={unitConversions.skinCells} />
-                <StatCard icon="💭" label="Dreams Had" value={stats.dreamsHad} delay={11} units={unitConversions.dreams} />
-                <StatCard icon="😴" label="Hours Slept" value={stats.sleepHours} delay={12} units={unitConversions.sleep} />
+                <StatCard icon="💅" label="Nails Grown" value={stats.fingernailsGrownInches} delay={10} units={unitConversions.fingernails} />
+                <StatCard icon="✨" label="Skin Cells Shed" value={stats.skinCellsShed} delay={11} units={unitConversions.skinCells} />
+                <StatCard icon="💭" label="Dreams Had" value={stats.dreamsHad} delay={12} units={unitConversions.dreams} />
+                <StatCard icon="😴" label="Hours Slept" value={stats.sleepHours} delay={13} units={unitConversions.sleep} />
+                <StatCard icon="😂" label="Times Laughed" value={stats.timesLaughed} delay={14} />
+                <StatCard icon="🤧" label="Sneezes" value={stats.sneezes} delay={15} />
+                <StatCard icon="🚽" label="Toilet Time" value={stats.toiletHours} delay={16} units={unitConversions.toilet} />
+                <StatCard icon="🔄" label="Blood Recycles" value={stats.bloodRecycles} delay={17} />
               </div>
             </div>
 
@@ -412,17 +474,98 @@ export default function Home() {
                 <span>🚀</span> Cosmic Journey
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <StatCard icon="🌍" label="Earth Orbits" value={stats.earthOrbits} delay={13} decimals={2} />
-                <StatCard icon="🌙" label="Full Moons" value={stats.fullMoons} delay={14} showFull />
-                <StatCard icon="🍂" label="Seasons" value={stats.seasonsExperienced} delay={15} showFull />
-                <StatCard icon="🌑" label="Solar Eclipses" value={stats.solarEclipses} delay={16} showFull />
-                <div className="col-span-2">
-                  <StatCard icon="🚀" label="Miles Through Space" value={stats.milesThroughSpace} delay={17} units={unitConversions.milesThroughSpace} />
-                </div>
+                <StatCard icon="🌍" label="Earth Orbits" value={stats.earthOrbits} delay={18} decimals={2} />
+                <StatCard icon="🌙" label="Full Moons" value={stats.fullMoons} delay={19} showFull />
+                <StatCard icon="🍂" label="Seasons" value={stats.seasonsExperienced} delay={20} showFull />
+                <StatCard icon="🌑" label="Solar Eclipses" value={stats.solarEclipses} delay={21} showFull />
+                <StatCard icon="📅" label="Leap Years" value={stats.leapYears} delay={22} showFull />
+                <StatCard icon="🚀" label="Miles Through Space" value={stats.milesThroughSpace} delay={23} units={unitConversions.milesThroughSpace} />
               </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
                 * Earth travels 1.6 million miles per day around the Sun. You&apos;ve been along for the ride!
               </p>
+            </div>
+
+            {/* Digital Stats */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>📱</span> Digital Life
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatCard icon="🔍" label="Google Searches" value={stats.googleSearches} delay={24} units={unitConversions.googleSearches} />
+                <StatCard icon="📧" label="Emails" value={stats.emailsSent} delay={25} units={unitConversions.emails} />
+                <StatCard icon="📸" label="Photos Taken" value={stats.photosTaken} delay={26} units={unitConversions.photos} />
+                <StatCard icon="🎬" label="Video Watched" value={stats.hoursOfVideoWatched} delay={27} units={unitConversions.videoHours} />
+              </div>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                * Calculated from internet era (1998) and smartphone era (2010)
+              </p>
+            </div>
+
+            {/* Consumption Stats */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>🍕</span> Consumption
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <StatCard icon="🐔" label="Chickens Eaten" value={stats.chickensConsumed} delay={28} />
+                <StatCard icon="🐄" label="Cows Worth of Beef" value={stats.cowsWorthOfBeef} delay={29} decimals={2} showFull />
+                <StatCard icon="🍕" label="Pizzas Eaten" value={stats.pizzasEaten} delay={30} />
+                <StatCard icon="💧" label="Water Drunk" value={stats.gallonsOfWaterDrunk} delay={31} units={unitConversions.water} />
+                <StatCard icon="☕" label="Cups of Coffee" value={stats.cupsOfCoffee} delay={32} units={unitConversions.coffee} />
+                <StatCard icon="🍽️" label="Meals Eaten" value={stats.mealsEaten} delay={33} units={unitConversions.meals} />
+              </div>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                * Based on US averages. Coffee counted from age 18+.
+              </p>
+            </div>
+
+            {/* Time Spent Stats */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>⏰</span> Time Spent
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <StatCard icon="🍽️" label="Eating" value={stats.hoursEating} delay={34} units={unitConversions.eating} />
+                <StatCard icon="🚿" label="Showering" value={stats.hoursShowering} delay={35} units={unitConversions.showering} />
+                <StatCard icon="🚦" label="At Red Lights" value={stats.hoursAtRedLights} delay={36} units={unitConversions.redLights} />
+              </div>
+              <p className="text-xs text-gray-500 mt-2 text-center">
+                * Red lights calculated from driving age (16+)
+              </p>
+            </div>
+
+            {/* World Events */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>🏛️</span> World Events
+              </h2>
+              <div className="stat-card rounded-2xl p-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div>
+                    <div className="text-sm text-gray-400 mb-2">US Presidents in Your Lifetime</div>
+                    <div className="text-3xl font-bold text-white mb-2">{stats.usPresidents.length}</div>
+                    <div className="text-xs text-gray-500 space-y-1">
+                      {stats.usPresidents.slice(-5).map((p, i) => (
+                        <div key={i}>{p}</div>
+                      ))}
+                      {stats.usPresidents.length > 5 && (
+                        <div className="text-indigo-400">+{stats.usPresidents.length - 5} more</div>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-400 mb-2">Summer Olympics</div>
+                    <div className="text-3xl font-bold text-amber-400">{stats.olympicsHeld}</div>
+                    <div className="text-xs text-gray-500">held during your lifetime</div>
+                  </div>
+                  <div>
+                    <div className="text-sm text-gray-400 mb-2">FIFA World Cups</div>
+                    <div className="text-3xl font-bold text-emerald-400">{stats.worldCups}</div>
+                    <div className="text-xs text-gray-500">held during your lifetime</div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             {/* World Context */}
