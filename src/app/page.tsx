@@ -39,7 +39,7 @@ export default function Home() {
     
     // Calculate gender stats if gender selected
     if (gender) {
-      const gStats = calculateGenderStats(date, gender);
+      const gStats = calculateGenderStats(date, gender, new Date(), country);
       setGenderStats(gStats);
     }
   }, [birthday, gender, country]);

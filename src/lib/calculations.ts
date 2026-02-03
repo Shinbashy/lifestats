@@ -572,8 +572,9 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date(), count
 }
 
 // Gender-specific constants
-const MALE_LIFE_EXPECTANCY = 76;
-const FEMALE_LIFE_EXPECTANCY = 81;
+// These are deltas from country average (men ~3 less, women ~3 more)
+const MALE_LIFE_EXPECTANCY_DELTA = -3;
+const FEMALE_LIFE_EXPECTANCY_DELTA = 3;
 const MALE_HEARTBEATS_PER_DAY = 100800; // ~70 bpm
 const FEMALE_HEARTBEATS_PER_DAY = 112320; // ~78 bpm
 const MALE_CALORIES_PER_DAY = 2500;
@@ -593,7 +594,8 @@ const FACIAL_HAIR_INCHES_PER_YEAR = 5.5; // After puberty
 export function calculateGenderStats(
   birthday: Date,
   gender: Gender,
-  now: Date = new Date()
+  now: Date = new Date(),
+  country: Country = 'us'
 ): GenderStats | null {
   if (!gender) return null;
   
@@ -604,8 +606,12 @@ export function calculateGenderStats(
   const isMale = gender === 'male';
   const isFemale = gender === 'female';
   
-  // Adjusted life expectancy
-  const adjustedLifeExpectancy = isMale ? MALE_LIFE_EXPECTANCY : FEMALE_LIFE_EXPECTANCY;
+  // Get country profile for base life expectancy
+  const profile = COUNTRY_PROFILES[country || 'us'] || COUNTRY_PROFILES.us;
+  
+  // Adjusted life expectancy (country + gender)
+  const genderDelta = isMale ? MALE_LIFE_EXPECTANCY_DELTA : FEMALE_LIFE_EXPECTANCY_DELTA;
+  const adjustedLifeExpectancy = profile.lifeExpectancy + genderDelta;
   const adjustedLifespanMs = adjustedLifeExpectancy * 365.25 * 24 * 60 * 60 * 1000;
   const adjustedLifespanPercentage = (msAlive / adjustedLifespanMs) * 100;
   
