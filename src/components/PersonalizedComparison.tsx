@@ -158,30 +158,83 @@ export default function PersonalizedComparison({
     });
   }
 
-  // Activity level impact on steps
-  if (personalData.activityLevel) {
-    const activityMultipliers: Record<string, number> = {
-      sedentary: 0.6,
-      moderate: 1.0,
-      active: 1.5,
-      very_active: 2.0,
-    };
-    const multiplier = activityMultipliers[personalData.activityLevel] || 1;
+  // Daily steps - use actual data if provided, otherwise estimate
+  if (personalData.dailySteps) {
     const avgSteps = profile.stepsPerDay;
-    const yourSteps = Math.floor(avgSteps * multiplier);
-    const diff = ((yourSteps - avgSteps) / avgSteps) * 100;
+    const diff = ((personalData.dailySteps - avgSteps) / avgSteps) * 100;
     
     comparisons.push({
       icon: '👟',
       label: 'Daily Steps',
-      yours: yourSteps.toLocaleString(),
+      yours: personalData.dailySteps.toLocaleString(),
       average: avgSteps.toLocaleString(),
       unit: 'steps',
       diff,
       diffLabel: diff > 0 
-        ? `${Math.abs(diff).toFixed(0)}% more active`
-        : `${Math.abs(diff).toFixed(0)}% less active`,
+        ? `${Math.abs(diff).toFixed(0)}% more than avg`
+        : `${Math.abs(diff).toFixed(0)}% fewer than avg`,
       highlight: diff > 20 ? 'good' : diff < -20 ? 'bad' : 'neutral',
+    });
+
+    // Lifetime steps
+    const yourLifetimeSteps = personalData.dailySteps * 365.25 * yearsAlive;
+    const avgLifetimeSteps = avgSteps * 365.25 * yearsAlive;
+    comparisons.push({
+      icon: '🚶',
+      label: 'Lifetime Steps',
+      yours: (yourLifetimeSteps / 1_000_000).toFixed(1) + 'M',
+      average: (avgLifetimeSteps / 1_000_000).toFixed(1) + 'M',
+      unit: 'million steps',
+      highlight: 'neutral',
+    });
+
+    // Miles walked
+    const yourMiles = Math.floor(yourLifetimeSteps / 2000);
+    const avgMiles = Math.floor(avgLifetimeSteps / 2000);
+    comparisons.push({
+      icon: '🗺️',
+      label: 'Miles Walked',
+      yours: yourMiles.toLocaleString(),
+      average: avgMiles.toLocaleString(),
+      unit: 'miles',
+      highlight: yourMiles > avgMiles ? 'good' : 'neutral',
+    });
+  }
+
+  // Work activity
+  if (personalData.workActivity) {
+    const workLabels: Record<string, string> = {
+      mostly_sitting: 'Mostly Sitting',
+      mixed: 'Mix Sit/Stand',
+      on_feet: 'On Your Feet',
+      physical_job: 'Physical Job',
+    };
+    comparisons.push({
+      icon: '💼',
+      label: 'Work Style',
+      yours: workLabels[personalData.workActivity] || personalData.workActivity,
+      average: 'Mostly Sitting',
+      unit: '(most common)',
+      highlight: personalData.workActivity === 'mostly_sitting' ? 'neutral' : 'good',
+    });
+  }
+
+  // Exercise frequency
+  if (personalData.exerciseFrequency) {
+    const exerciseLabels: Record<string, string> = {
+      rarely: 'Rarely',
+      light: '1-2x/week',
+      moderate: '3-4x/week',
+      intense: '5+/week',
+    };
+    comparisons.push({
+      icon: '🏋️',
+      label: 'Exercise',
+      yours: exerciseLabels[personalData.exerciseFrequency] || personalData.exerciseFrequency,
+      average: '1-2x/week',
+      unit: '(national avg)',
+      highlight: personalData.exerciseFrequency === 'rarely' ? 'bad' : 
+                 personalData.exerciseFrequency === 'light' ? 'neutral' : 'good',
     });
   }
 

@@ -7,7 +7,11 @@ export interface PersonalData {
   heightFeet?: number;
   heightInches?: number;
   weightLbs?: number;
-  activityLevel?: 'sedentary' | 'moderate' | 'active' | 'very_active';
+  
+  // Activity (split into work + exercise)
+  workActivity?: 'mostly_sitting' | 'mixed' | 'on_feet' | 'physical_job';
+  exerciseFrequency?: 'rarely' | 'light' | 'moderate' | 'intense';
+  dailySteps?: number;
   
   // Lifestyle
   sleepHours?: number;
@@ -151,21 +155,21 @@ export default function PersonalizationModal({ isOpen, onClose, onComplete }: Pe
                 </div>
               </div>
 
-              {/* Activity Level */}
+              {/* Work Activity */}
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Activity Level</label>
+                <label className="block text-sm text-gray-400 mb-2">During work, you&apos;re usually...</label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { value: 'sedentary', label: '🪑 Sedentary', desc: 'Little to no exercise' },
-                    { value: 'moderate', label: '🚶 Moderate', desc: 'Light exercise 1-3x/week' },
-                    { value: 'active', label: '🏃 Active', desc: 'Exercise 4-5x/week' },
-                    { value: 'very_active', label: '💪 Very Active', desc: 'Intense daily exercise' },
+                    { value: 'mostly_sitting', label: '🪑 Mostly sitting', desc: 'Desk/computer work' },
+                    { value: 'mixed', label: '🧍 Mix sit/stand', desc: 'Standing desk, some moving' },
+                    { value: 'on_feet', label: '🚶 On your feet', desc: 'Retail, teaching, etc.' },
+                    { value: 'physical_job', label: '🏗️ Physical job', desc: 'Construction, warehouse' },
                   ].map(opt => (
                     <button
                       key={opt.value}
-                      onClick={() => updateData({ activityLevel: opt.value as PersonalData['activityLevel'] })}
+                      onClick={() => updateData({ workActivity: opt.value as PersonalData['workActivity'] })}
                       className={`p-3 rounded-xl text-left transition-all ${
-                        data.activityLevel === opt.value
+                        data.workActivity === opt.value
                           ? 'bg-indigo-500/30 border-2 border-indigo-500'
                           : 'bg-gray-800 border border-gray-700 hover:border-gray-600'
                       }`}
@@ -175,6 +179,52 @@ export default function PersonalizationModal({ isOpen, onClose, onComplete }: Pe
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Exercise Frequency */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">Exercise habits</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    { value: 'rarely', label: '😴 Rarely/never', desc: 'Less than 1x/week' },
+                    { value: 'light', label: '🚶 Light', desc: '1-2x per week' },
+                    { value: 'moderate', label: '🏃 Moderate', desc: '3-4x per week' },
+                    { value: 'intense', label: '💪 Intense', desc: '5+ times per week' },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      onClick={() => updateData({ exerciseFrequency: opt.value as PersonalData['exerciseFrequency'] })}
+                      className={`p-3 rounded-xl text-left transition-all ${
+                        data.exerciseFrequency === opt.value
+                          ? 'bg-indigo-500/30 border-2 border-indigo-500'
+                          : 'bg-gray-800 border border-gray-700 hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="font-medium text-white text-sm">{opt.label}</div>
+                      <div className="text-xs text-gray-400">{opt.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Daily Steps */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">
+                  Daily Steps <span className="text-gray-500">(if you track them)</span>
+                </label>
+                <div className="flex gap-3 items-center">
+                  <input
+                    type="number"
+                    min="0"
+                    step="500"
+                    placeholder="8000"
+                    value={data.dailySteps || ''}
+                    onChange={e => updateData({ dailySteps: parseInt(e.target.value) || undefined })}
+                    className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
+                  />
+                  <span className="text-gray-400">steps/day</span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Check your phone&apos;s health app or fitness tracker</p>
               </div>
             </div>
           )}
