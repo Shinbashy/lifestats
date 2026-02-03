@@ -360,7 +360,7 @@ export default function Home() {
             <span className="gradient-text">LifeStats</span>
           </h1>
           <p className="text-gray-400 text-lg md:text-xl max-w-lg mx-auto">
-            Discover the incredible numbers behind your existence
+            Welcome to your life
           </p>
         </div>
 
@@ -512,16 +512,21 @@ export default function Home() {
 
             {/* Personalized Badge */}
             {personalData && (
-              <div className="flex items-center justify-center gap-2 text-sm">
-                <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1 rounded-full font-medium">
-                  ✨ Personalized Stats Active
-                </span>
-                <button
-                  onClick={() => setShowPersonalization(true)}
-                  className="text-indigo-400 hover:underline"
-                >
-                  Edit
-                </button>
+              <div className="text-center mb-4">
+                <p className="text-gray-300 text-lg mb-3">
+                  Discover the incredible numbers behind your existence
+                </p>
+                <div className="flex items-center justify-center gap-2 text-sm">
+                  <span className="bg-gradient-to-r from-indigo-500 to-purple-500 text-white px-3 py-1 rounded-full font-medium">
+                    ✨ Personalized Stats Active
+                  </span>
+                  <button
+                    onClick={() => setShowPersonalization(true)}
+                    className="text-indigo-400 hover:underline"
+                  >
+                    Edit
+                  </button>
+                </div>
               </div>
             )}
 
