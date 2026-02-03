@@ -178,6 +178,14 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [birthdayDate, country]);
 
+  // Recalculate gender stats when country changes
+  useEffect(() => {
+    if (!birthdayDate || !gender) return;
+    
+    const gStats = calculateGenderStats(birthdayDate, gender, new Date(), country);
+    setGenderStats(gStats);
+  }, [birthdayDate, gender, country]);
+
   // Memoize unit conversions
   const unitConversions = useMemo(() => {
     if (!stats) return null;
