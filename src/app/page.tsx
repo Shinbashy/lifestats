@@ -1,65 +1,236 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect, useCallback } from 'react';
+import { calculateLifeStats, LifeStats } from '@/lib/calculations';
+import StatCard from '@/components/StatCard';
+import ProgressBar from '@/components/ProgressBar';
+import BirthdayCountdown from '@/components/BirthdayCountdown';
+import ShareCard from '@/components/ShareCard';
 
 export default function Home() {
+  const [birthday, setBirthday] = useState<string>('');
+  const [stats, setStats] = useState<LifeStats | null>(null);
+  const [birthdayDate, setBirthdayDate] = useState<Date | null>(null);
+  const [liveSeconds, setLiveSeconds] = useState(0);
+
+  const handleSubmit = useCallback((e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (!birthday) return;
+    
+    const date = new Date(birthday + 'T00:00:00');
+    if (date > new Date()) {
+      alert('Please enter a birthday in the past!');
+      return;
+    }
+    
+    setBirthdayDate(date);
+    const calculatedStats = calculateLifeStats(date);
+    setStats(calculatedStats);
+    setLiveSeconds(calculatedStats.secondsAlive);
+  }, [birthday]);
+
+  // Live seconds counter
+  useEffect(() => {
+    if (!stats) return;
+    
+    const interval = setInterval(() => {
+      setLiveSeconds(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [stats]);
+
+  // Recalculate stats every minute for accuracy
+  useEffect(() => {
+    if (!birthdayDate) return;
+    
+    const interval = setInterval(() => {
+      const newStats = calculateLifeStats(birthdayDate);
+      setStats(newStats);
+    }, 60000);
+
+    return () => clearInterval(interval);
+  }, [birthdayDate]);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="animated-bg min-h-screen">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 py-8 md:py-16">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl md:text-6xl font-bold mb-4">
+            <span className="gradient-text">LifeStats</span>
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="text-gray-400 text-lg md:text-xl max-w-lg mx-auto">
+            Discover the incredible numbers behind your existence
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+
+        {/* Birthday Input */}
+        {!stats && (
+          <form onSubmit={handleSubmit} className="max-w-md mx-auto mb-12">
+            <div className="stat-card rounded-2xl p-6 glow">
+              <label className="block text-sm text-gray-400 mb-2">
+                When did your journey begin?
+              </label>
+              <input
+                type="date"
+                value={birthday}
+                onChange={(e) => setBirthday(e.target.value)}
+                className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white text-lg focus:outline-none focus:border-indigo-500 transition-colors"
+                max={new Date().toISOString().split('T')[0]}
+                required
+              />
+              <button
+                type="submit"
+                className="btn-primary w-full mt-4 py-3 rounded-xl font-semibold text-white text-lg"
+              >
+                ✨ Calculate My Stats
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Stats Dashboard */}
+        {stats && birthdayDate && (
+          <div className="space-y-8 animate-fadeIn">
+            {/* Reset Button */}
+            <div className="text-center">
+              <button
+                onClick={() => {
+                  setStats(null);
+                  setBirthdayDate(null);
+                  setBirthday('');
+                }}
+                className="text-sm text-gray-500 hover:text-indigo-400 transition-colors"
+              >
+                ← Enter different birthday
+              </button>
+            </div>
+
+            {/* Hero Stats */}
+            <div className="stat-card rounded-2xl p-6 md:p-8 text-center glow">
+              <div className="text-5xl md:text-7xl font-bold gradient-text mb-2 live-counter tabular-nums">
+                {liveSeconds.toLocaleString()}
+              </div>
+              <div className="text-gray-400">seconds of your incredible journey</div>
+              <div className="text-xs text-indigo-400 mt-2 animate-pulse">● counting live</div>
+            </div>
+
+            {/* Main Stats Grid */}
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              <StatCard 
+                icon="📅" 
+                label="Days Alive" 
+                value={stats.daysAlive}
+                delay={1}
+              />
+              <StatCard 
+                icon="⏰" 
+                label="Hours Alive" 
+                value={stats.hoursAlive}
+                delay={2}
+              />
+              <StatCard 
+                icon="💓" 
+                label="Heartbeats" 
+                value={stats.heartbeats}
+                delay={3}
+              />
+              <StatCard 
+                icon="🌬️" 
+                label="Breaths Taken" 
+                value={stats.breaths}
+                delay={4}
+              />
+              <StatCard 
+                icon="🌙" 
+                label="Full Moons" 
+                value={stats.fullMoons}
+                delay={5}
+                showFull
+              />
+              <StatCard 
+                icon="🌍" 
+                label="Earth Orbits" 
+                value={stats.earthOrbits}
+                delay={6}
+                decimals={2}
+              />
+              <StatCard 
+                icon="🍂" 
+                label="Seasons" 
+                value={stats.seasonsExperienced}
+                delay={7}
+                showFull
+              />
+              <StatCard 
+                icon="😴" 
+                label="Hours Slept" 
+                value={stats.sleepHours}
+                delay={8}
+              />
+              <StatCard 
+                icon="👁️" 
+                label="Blinks" 
+                value={stats.blinks}
+                delay={9}
+              />
+            </div>
+
+            {/* Lifespan Progress */}
+            <ProgressBar 
+              percentage={stats.lifespanPercentage}
+              label="Your Life Journey"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+
+            {/* Birthday Countdown */}
+            <BirthdayCountdown 
+              daysUntilBirthday={stats.daysUntilBirthday}
+              nextAge={stats.nextBirthdayAge}
+            />
+
+            {/* Fun Facts */}
+            <div className="stat-card rounded-2xl p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>💡</span> Fun Facts
+              </h3>
+              <ul className="space-y-3 text-gray-300">
+                <li className="flex items-start gap-2">
+                  <span className="text-indigo-400">•</span>
+                  You&apos;ve walked approximately <span className="text-white font-semibold">{(stats.stepsWalked).toLocaleString()}</span> steps
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-purple-400">•</span>
+                  You&apos;ve eaten around <span className="text-white font-semibold">{stats.mealsEaten.toLocaleString()}</span> meals
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-pink-400">•</span>
+                  You&apos;ve spoken roughly <span className="text-white font-semibold">{(stats.wordsSpoken / 1000000).toFixed(1)}M</span> words
+                </li>
+                {stats.secondsAlive >= 1_000_000_000 && (
+                  <li className="flex items-start gap-2">
+                    <span className="text-yellow-400">🏆</span>
+                    <span className="text-yellow-300 font-semibold">You&apos;ve been alive for over 1 BILLION seconds!</span>
+                  </li>
+                )}
+              </ul>
+            </div>
+
+            {/* Share Section */}
+            <div className="stat-card rounded-2xl p-6">
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <span>📤</span> Share Your Stats
+              </h3>
+              <ShareCard stats={stats} birthday={birthdayDate} />
+            </div>
+
+            {/* Footer */}
+            <div className="text-center text-gray-500 text-sm pt-8">
+              <p>Made with ❤️ • Every number tells your story</p>
+            </div>
+          </div>
+        )}
+      </div>
+    </main>
   );
 }
