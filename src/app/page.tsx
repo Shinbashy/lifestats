@@ -488,11 +488,12 @@ export default function Home() {
               <span>💡 Tap any stat with ↻ to change units</span>
               <span className="text-gray-700">|</span>
               <div className="flex items-center gap-2">
+                <span className="text-gray-500">What if I lived in</span>
                 <span>{COUNTRY_PROFILES[country || 'us'].flag}</span>
                 <select
                   value={country || 'us'}
                   onChange={(e) => setCountry(e.target.value as Country)}
-                  className="bg-transparent border-none text-gray-400 text-sm cursor-pointer hover:text-white focus:outline-none"
+                  className="bg-transparent border-none text-indigo-400 text-sm cursor-pointer hover:text-indigo-300 focus:outline-none font-medium"
                 >
                   {Object.entries(COUNTRY_PROFILES).map(([code, profile]) => (
                     <option key={code} value={code} className="bg-gray-900">
@@ -500,6 +501,7 @@ export default function Home() {
                     </option>
                   ))}
                 </select>
+                <span className="text-gray-500">?</span>
               </div>
             </div>
 
