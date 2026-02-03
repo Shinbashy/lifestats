@@ -1128,22 +1128,27 @@ export default function Home() {
           onComplete={async (data) => {
             setPersonalData(data);
             setShowPersonalization(false);
-            setIsSaving(true);
             
-            // Save to Supabase
-            try {
-              const profileData = personalDataToProfile(data, birthday, gender, country);
-              const newProfileId = await saveProfile(profileData);
-              
-              if (newProfileId) {
-                setProfileId(newProfileId);
-                localStorage.setItem('lifestats_profile_id', newProfileId);
-                console.log('Profile saved:', newProfileId);
+            // Only save to Supabase on FIRST personalization (no existing profile)
+            // This prevents duplicate entries when users explore different countries
+            if (!profileId) {
+              setIsSaving(true);
+              try {
+                const profileData = personalDataToProfile(data, birthday, gender, country);
+                const newProfileId = await saveProfile(profileData);
+                
+                if (newProfileId) {
+                  setProfileId(newProfileId);
+                  localStorage.setItem('lifestats_profile_id', newProfileId);
+                  console.log('Profile saved:', newProfileId);
+                }
+              } catch (error) {
+                console.error('Failed to save profile:', error);
+              } finally {
+                setIsSaving(false);
               }
-            } catch (error) {
-              console.error('Failed to save profile:', error);
-            } finally {
-              setIsSaving(false);
+            } else {
+              console.log('Profile already exists, skipping save (exploration mode)');
             }
           }}
         />
