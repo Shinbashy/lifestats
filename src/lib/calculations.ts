@@ -458,12 +458,22 @@ export interface FutureMilestone {
   description: string;
 }
 
+export interface LifeInWeeks {
+  totalWeeksLived: number;
+  totalWeeksExpected: number;
+  weeksRemaining: number;
+  percentComplete: number;
+  yearsLived: number;
+  expectedLifespan: number;
+}
+
 export interface LifeStats {
   // Time
   daysAlive: number;
   hoursAlive: number;
   minutesAlive: number;
   secondsAlive: number;
+  weeksAlive: number;
   
   // Birth info (NEW)
   birthInfo: BirthInfo;
@@ -473,6 +483,16 @@ export interface LifeStats {
   
   // Achievement badges (NEW)
   achievements: { name: string; emoji: string; earned: boolean; description: string }[];
+  
+  // Planetary ages (NEW)
+  planetaryAges: PlanetaryAge[];
+  
+  // Life in Weeks (NEW)
+  lifeInWeeks: LifeInWeeks;
+  
+  // New moon data
+  newMoons: number;
+  lunarEclipses: number;
   
   // Body
   heartbeats: number;
@@ -623,6 +643,27 @@ const POPULATION_DATA: { year: number; pop: number }[] = [
 // Solar eclipses by year range (total + annular visible somewhere on Earth)
 // Roughly 2-5 solar eclipses per year globally
 const SOLAR_ECLIPSES_PER_YEAR = 2.4;
+
+// Planetary orbital periods in Earth days
+export const PLANETS = [
+  { name: 'Mercury', emoji: '☿️', orbitalPeriod: 87.97, color: 'gray', fact: 'You\'d have had {age} birthdays!' },
+  { name: 'Venus', emoji: '♀️', orbitalPeriod: 224.7, color: 'yellow', fact: 'Venus days are longer than its years!' },
+  { name: 'Earth', emoji: '🌍', orbitalPeriod: 365.25, color: 'blue', fact: 'Home sweet home' },
+  { name: 'Mars', emoji: '♂️', orbitalPeriod: 686.98, color: 'red', fact: 'A year on Mars = 687 Earth days' },
+  { name: 'Jupiter', emoji: '♃', orbitalPeriod: 4332.59, color: 'orange', fact: 'The largest planet in our solar system' },
+  { name: 'Saturn', emoji: '♄', orbitalPeriod: 10759.22, color: 'amber', fact: 'Famous for its beautiful rings' },
+  { name: 'Uranus', emoji: '♅', orbitalPeriod: 30688.5, color: 'cyan', fact: 'Rotates on its side!' },
+  { name: 'Neptune', emoji: '♆', orbitalPeriod: 60182, color: 'indigo', fact: 'Windiest planet - 1,200 mph winds' },
+];
+
+export interface PlanetaryAge {
+  name: string;
+  emoji: string;
+  age: number;
+  nextBirthday: number; // days until next birthday on this planet
+  fact: string;
+  color: string;
+}
 
 // Recorded human history ~5000 years (writing invented ~3000 BCE)
 const RECORDED_HISTORY_YEARS = 5000;
@@ -837,6 +878,39 @@ function calculateAchievements(daysAlive: number, secondsAlive: number, fullMoon
   ];
 }
 
+function calculatePlanetaryAges(daysAlive: number): PlanetaryAge[] {
+  return PLANETS.map(planet => {
+    const age = daysAlive / planet.orbitalPeriod;
+    const completedOrbits = Math.floor(age);
+    const progressIntoYear = age - completedOrbits;
+    const daysUntilNextBirthday = Math.ceil((1 - progressIntoYear) * planet.orbitalPeriod);
+    
+    return {
+      name: planet.name,
+      emoji: planet.emoji,
+      age: age,
+      nextBirthday: daysUntilNextBirthday,
+      fact: planet.fact.replace('{age}', completedOrbits.toString()),
+      color: planet.color,
+    };
+  });
+}
+
+function calculateLifeInWeeks(daysAlive: number, lifeExpectancy: number): LifeInWeeks {
+  const weeksLived = Math.floor(daysAlive / 7);
+  const expectedWeeks = Math.floor(lifeExpectancy * 52.1775);
+  const yearsLived = daysAlive / 365.25;
+  
+  return {
+    totalWeeksLived: weeksLived,
+    totalWeeksExpected: expectedWeeks,
+    weeksRemaining: Math.max(0, expectedWeeks - weeksLived),
+    percentComplete: (weeksLived / expectedWeeks) * 100,
+    yearsLived: yearsLived,
+    expectedLifespan: lifeExpectancy,
+  };
+}
+
 function interpolatePopulation(year: number): number {
   // Clamp to data range
   if (year <= POPULATION_DATA[0].year) return POPULATION_DATA[0].pop;
@@ -871,6 +945,11 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date(), count
   
   // Full moons witnessed
   const fullMoons = Math.floor(daysAlive / LUNAR_CYCLE_DAYS);
+  const newMoons = fullMoons; // Same count, different phase
+  const lunarEclipses = Math.floor(yearsAlive * 2.4); // ~2.4 lunar eclipses per year globally
+  
+  // Weeks alive
+  const weeksAlive = Math.floor(daysAlive / 7);
   
   // Seasons (4 per year)
   const seasonsExperienced = Math.floor(earthOrbits * 4);
@@ -1037,6 +1116,12 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date(), count
   // Achievements
   const achievements = calculateAchievements(daysAlive, secondsAlive, fullMoons, heartbeats, yearsAlive);
   
+  // Planetary ages
+  const planetaryAges = calculatePlanetaryAges(daysAlive);
+  
+  // Life in weeks
+  const lifeInWeeks = calculateLifeInWeeks(daysAlive, countryLifeExpectancy);
+  
   // Milestones
   const BILLION_SECONDS = 1_000_000_000;
   const TEN_THOUSAND_DAYS = 10_000;
@@ -1066,6 +1151,7 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date(), count
     hoursAlive,
     minutesAlive,
     secondsAlive,
+    weeksAlive,
     
     // Birth info (NEW)
     birthInfo,
@@ -1075,6 +1161,16 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date(), count
     
     // Achievement badges (NEW)
     achievements,
+    
+    // Planetary ages (NEW)
+    planetaryAges,
+    
+    // Life in weeks (NEW)
+    lifeInWeeks,
+    
+    // Moon data
+    newMoons,
+    lunarEclipses,
     
     // Body
     heartbeats,

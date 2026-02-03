@@ -6,6 +6,8 @@ import StatCard, { UnitOption } from '@/components/StatCard';
 import ProgressBar from '@/components/ProgressBar';
 import BirthdayCountdown from '@/components/BirthdayCountdown';
 import ShareCard from '@/components/ShareCard';
+import LifeInWeeksGrid from '@/components/LifeInWeeksGrid';
+import PlanetaryAges from '@/components/PlanetaryAges';
 
 // Conversion helpers
 function createUnits(conversions: { label: string; value: number; suffix?: string; decimals?: number }[]): UnitOption[] {
@@ -600,8 +602,8 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard icon="📅" label="Days" value={stats.daysAlive} delay={1} units={unitConversions.days} />
-                <StatCard icon="⏰" label="Hours" value={stats.hoursAlive} delay={2} units={unitConversions.hours} />
-                <StatCard icon="⏱️" label="Minutes" value={stats.minutesAlive} delay={3} units={unitConversions.minutes} />
+                <StatCard icon="📆" label="Weeks" value={stats.weeksAlive} delay={2} />
+                <StatCard icon="⏰" label="Hours" value={stats.hoursAlive} delay={3} units={unitConversions.hours} />
                 <StatCard icon="🌅" label="Sunrises" value={stats.sunrisesWitnessed} delay={4} />
               </div>
             </div>
@@ -722,16 +724,24 @@ export default function Home() {
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <StatCard icon="🌍" label="Earth Orbits" value={stats.earthOrbits} delay={18} decimals={2} />
-                <StatCard icon="🌙" label="Full Moons" value={stats.fullMoons} delay={19} showFull />
-                <StatCard icon="🍂" label="Seasons" value={stats.seasonsExperienced} delay={20} showFull />
-                <StatCard icon="🌑" label="Solar Eclipses" value={stats.solarEclipses} delay={21} showFull />
-                <StatCard icon="📅" label="Leap Years" value={stats.leapYears} delay={22} showFull />
-                <StatCard icon="🚀" label="Miles Through Space" value={stats.milesThroughSpace} delay={23} units={unitConversions.milesThroughSpace} />
+                <StatCard icon="🌕" label="Full Moons" value={stats.fullMoons} delay={19} showFull />
+                <StatCard icon="🌑" label="New Moons" value={stats.newMoons} delay={20} showFull />
+                <StatCard icon="🍂" label="Seasons" value={stats.seasonsExperienced} delay={21} showFull />
+                <StatCard icon="☀️" label="Solar Eclipses" value={stats.solarEclipses} delay={22} showFull />
+                <StatCard icon="🌘" label="Lunar Eclipses" value={stats.lunarEclipses} delay={23} showFull />
+                <StatCard icon="📅" label="Leap Years" value={stats.leapYears} delay={24} showFull />
+                <StatCard icon="🚀" label="Miles Through Space" value={stats.milesThroughSpace} delay={25} units={unitConversions.milesThroughSpace} />
               </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
                 * Earth travels 1.6 million miles per day around the Sun. You&apos;ve been along for the ride!
               </p>
             </div>
+
+            {/* Planetary Ages */}
+            <PlanetaryAges planetaryAges={stats.planetaryAges} />
+
+            {/* Life in Weeks Grid */}
+            <LifeInWeeksGrid lifeInWeeks={stats.lifeInWeeks} />
 
             {/* Digital Stats */}
             <div>
@@ -961,12 +971,7 @@ export default function Home() {
             </div>
 
             {/* Share Section */}
-            <div className="stat-card rounded-2xl p-6">
-              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <span>📤</span> Share Your Stats
-              </h3>
-              <ShareCard stats={stats} birthday={birthdayDate} />
-            </div>
+            <ShareCard stats={stats} birthday={birthdayDate} />
 
             {/* Footer */}
             <div className="text-center text-gray-500 text-sm pt-8">
