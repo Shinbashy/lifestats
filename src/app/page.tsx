@@ -377,6 +377,204 @@ export default function Home() {
               💡 Tap any stat with ↻ to change units
             </div>
 
+            {/* Birth Identity Card */}
+            <div className="stat-card rounded-2xl p-6 border-2 border-purple-500/30">
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>🔮</span> Your Cosmic Identity
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="bg-gray-800/50 rounded-xl p-4 text-center">
+                  <div className="text-3xl mb-1">{stats.birthInfo.westernZodiac.emoji}</div>
+                  <div className="text-lg font-bold text-white">{stats.birthInfo.westernZodiac.name}</div>
+                  <div className="text-xs text-gray-400">{stats.birthInfo.westernZodiac.symbol} {stats.birthInfo.westernZodiac.element}</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-xl p-4 text-center">
+                  <div className="text-3xl mb-1">{stats.birthInfo.chineseZodiac.emoji}</div>
+                  <div className="text-lg font-bold text-white">{stats.birthInfo.chineseZodiac.animal}</div>
+                  <div className="text-xs text-gray-400">Chinese Zodiac</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-xl p-4 text-center">
+                  <div className="text-3xl mb-1">{stats.birthInfo.birthstone.emoji}</div>
+                  <div className="text-lg font-bold text-white">{stats.birthInfo.birthstone.name}</div>
+                  <div className="text-xs text-gray-400">Birthstone</div>
+                </div>
+                <div className="bg-gray-800/50 rounded-xl p-4 text-center">
+                  <div className="text-3xl mb-1">{stats.birthInfo.generation.emoji}</div>
+                  <div className="text-lg font-bold text-white">{stats.birthInfo.generation.name}</div>
+                  <div className="text-xs text-gray-400">Generation</div>
+                </div>
+              </div>
+              
+              {/* Day of Birth Details */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="bg-purple-500/10 rounded-lg p-3 text-center border border-purple-500/20">
+                  <div className="text-xl">{stats.birthInfo.dayOfWeekEmoji}</div>
+                  <div className="text-sm text-white font-medium">{stats.birthInfo.dayOfWeek}</div>
+                  <div className="text-xs text-gray-400">Born on</div>
+                </div>
+                <div className="bg-purple-500/10 rounded-lg p-3 text-center border border-purple-500/20">
+                  <div className="text-xl">{stats.birthInfo.moonEmoji}</div>
+                  <div className="text-sm text-white font-medium">{stats.birthInfo.moonPhase}</div>
+                  <div className="text-xs text-gray-400">Moon phase</div>
+                </div>
+                <div className="bg-purple-500/10 rounded-lg p-3 text-center border border-purple-500/20">
+                  <div className="text-xl">{stats.birthInfo.seasonEmoji}</div>
+                  <div className="text-sm text-white font-medium">{stats.birthInfo.season}</div>
+                  <div className="text-xs text-gray-400">Season</div>
+                </div>
+              </div>
+
+              {/* Traits */}
+              <div className="flex flex-wrap gap-2 justify-center">
+                {stats.birthInfo.westernZodiac.traits.map((trait, i) => (
+                  <span key={i} className="text-xs bg-indigo-500/20 text-indigo-300 px-3 py-1 rounded-full">
+                    {trait}
+                  </span>
+                ))}
+                {stats.birthInfo.generation.traits.slice(0, 2).map((trait, i) => (
+                  <span key={`gen-${i}`} className="text-xs bg-purple-500/20 text-purple-300 px-3 py-1 rounded-full">
+                    {trait}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {/* Famous Birthday Twins */}
+            {stats.birthInfo.famousBirthdays.length > 0 && (
+              <div className="stat-card rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                  <span>🎂</span> Famous Birthday Twins
+                </h2>
+                <div className="flex flex-wrap gap-3 justify-center">
+                  {stats.birthInfo.famousBirthdays.map((celeb, i) => (
+                    <div key={i} className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2 text-center">
+                      <div className="text-white font-medium">{celeb.name}</div>
+                      <div className="text-xs text-gray-400">{celeb.desc} • {celeb.year}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* When You Were Born */}
+            {stats.birthInfo.birthYearContext.song && (
+              <div className="stat-card rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                  <span>📅</span> The Year You Were Born ({birthdayDate.getFullYear()})
+                </h2>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  {stats.birthInfo.birthYearContext.song && (
+                    <div className="bg-gray-800/50 rounded-xl p-4">
+                      <div className="text-2xl mb-1">🎵</div>
+                      <div className="text-xs text-gray-400 mb-1">#1 Song</div>
+                      <div className="text-sm text-white">{stats.birthInfo.birthYearContext.song}</div>
+                    </div>
+                  )}
+                  {stats.birthInfo.birthYearContext.movie && (
+                    <div className="bg-gray-800/50 rounded-xl p-4">
+                      <div className="text-2xl mb-1">🎬</div>
+                      <div className="text-xs text-gray-400 mb-1">Top Movie</div>
+                      <div className="text-sm text-white">{stats.birthInfo.birthYearContext.movie}</div>
+                    </div>
+                  )}
+                  {stats.birthInfo.birthYearContext.event && (
+                    <div className="bg-gray-800/50 rounded-xl p-4">
+                      <div className="text-2xl mb-1">📰</div>
+                      <div className="text-xs text-gray-400 mb-1">Big Event</div>
+                      <div className="text-sm text-white">{stats.birthInfo.birthYearContext.event}</div>
+                    </div>
+                  )}
+                  {stats.birthInfo.birthYearContext.price_gas && (
+                    <div className="bg-gray-800/50 rounded-xl p-4">
+                      <div className="text-2xl mb-1">⛽</div>
+                      <div className="text-xs text-gray-400 mb-1">Gas Price</div>
+                      <div className="text-sm text-white">${stats.birthInfo.birthYearContext.price_gas?.toFixed(2)}/gal</div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Tech Timeline */}
+            {stats.birthInfo.techTimeline.length > 0 && (
+              <div className="stat-card rounded-2xl p-6">
+                <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                  <span>💻</span> Tech Milestones in Your Lifetime
+                </h2>
+                <div className="relative">
+                  <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-cyan-500 to-purple-500"></div>
+                  <div className="space-y-3">
+                    {stats.birthInfo.techTimeline.slice(0, 8).map((tech, i) => (
+                      <div key={i} className="flex items-center gap-4 pl-8 relative">
+                        <div className="absolute left-2.5 w-3 h-3 bg-cyan-500 rounded-full border-2 border-gray-900"></div>
+                        <div className="text-xl">{tech.emoji}</div>
+                        <div className="flex-1">
+                          <span className="text-white font-medium">{tech.event}</span>
+                          <span className="text-gray-400 text-sm ml-2">
+                            ({tech.year} • age {tech.ageAtEvent})
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Achievement Badges */}
+            <div className="stat-card rounded-2xl p-6">
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>🏅</span> Achievements
+              </h2>
+              <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+                {stats.achievements.map((achievement, i) => (
+                  <div 
+                    key={i} 
+                    className={`rounded-xl p-3 text-center transition-all ${
+                      achievement.earned 
+                        ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/50' 
+                        : 'bg-gray-800/30 border border-gray-700/50 opacity-50'
+                    }`}
+                  >
+                    <div className={`text-2xl mb-1 ${!achievement.earned && 'grayscale'}`}>
+                      {achievement.emoji}
+                    </div>
+                    <div className={`text-xs font-medium ${achievement.earned ? 'text-white' : 'text-gray-500'}`}>
+                      {achievement.name}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Future Milestones */}
+            {stats.futureMilestones.length > 0 && (
+              <div className="stat-card rounded-2xl p-6 border-2 border-cyan-500/30">
+                <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                  <span>🎯</span> Upcoming Milestones
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {stats.futureMilestones.slice(0, 4).map((milestone, i) => (
+                    <div key={i} className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-xl p-4 border border-cyan-500/20">
+                      <div className="flex items-center gap-3 mb-2">
+                        <span className="text-2xl">{milestone.emoji}</span>
+                        <div>
+                          <div className="font-bold text-white">{milestone.name}</div>
+                          <div className="text-xs text-gray-400">{milestone.description}</div>
+                        </div>
+                      </div>
+                      <div className="text-2xl font-bold text-cyan-300">
+                        {milestone.daysUntil.toLocaleString()} days
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        📅 {formatDate(milestone.date)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Milestone Badges */}
             {(stats.isInBillionClub || stats.isIn10kClub) && (
               <div className="flex flex-wrap justify-center gap-3">
@@ -554,18 +752,29 @@ export default function Home() {
             {/* Consumption Stats */}
             <div>
               <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>🍕</span> Consumption
+                <span>🍽️</span> Consumption
+                <span className="text-xs text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                  {COUNTRY_PROFILES[country || 'us'].flag} local cuisine
+                </span>
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                <StatCard icon="🐔" label="Chickens Eaten" value={stats.chickensConsumed} delay={28} />
-                <StatCard icon="🐄" label="Cows Worth of Beef" value={stats.cowsWorthOfBeef} delay={29} decimals={2} showFull />
-                <StatCard icon="🍕" label="Pizzas Eaten" value={stats.pizzasEaten} delay={30} />
-                <StatCard icon="💧" label="Water Drunk" value={stats.gallonsOfWaterDrunk} delay={31} units={unitConversions.water} />
-                <StatCard icon="☕" label="Cups of Coffee" value={stats.cupsOfCoffee} delay={32} units={unitConversions.coffee} />
-                <StatCard icon="🍽️" label="Meals Eaten" value={stats.mealsEaten} delay={33} units={unitConversions.meals} />
+                {stats.foodStats.map((food, index) => (
+                  <StatCard 
+                    key={food.key}
+                    icon={food.icon} 
+                    label={food.label} 
+                    value={food.value} 
+                    delay={28 + index}
+                    decimals={food.decimals}
+                    showFull={food.showFull}
+                  />
+                ))}
+                <StatCard icon="💧" label="Water Drunk" value={stats.gallonsOfWaterDrunk} delay={34} units={unitConversions.water} />
+                <StatCard icon="☕" label="Cups of Coffee" value={stats.cupsOfCoffee} delay={35} units={unitConversions.coffee} />
+                <StatCard icon="🍽️" label="Meals Eaten" value={stats.mealsEaten} delay={36} units={unitConversions.meals} />
               </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                * Based on US averages. Coffee counted from age 18+.
+                * Based on {COUNTRY_PROFILES[country || 'us'].name} averages. Coffee counted from age 18+.
               </p>
             </div>
 
