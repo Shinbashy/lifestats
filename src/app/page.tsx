@@ -170,15 +170,16 @@ export default function Home() {
                 type="date"
                 value={birthday}
                 onChange={(e) => setBirthday(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Tab' && !e.shiftKey) {
-                    e.preventDefault();
-                    submitButtonRef.current?.focus();
-                  }
-                }}
                 className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white text-lg focus:outline-none focus:border-indigo-500 transition-colors"
                 max={new Date().toISOString().split('T')[0]}
                 required
+              />
+              {/* Focus trap - catches Tab after date input and redirects to button */}
+              <span
+                tabIndex={0}
+                onFocus={() => submitButtonRef.current?.focus()}
+                className="sr-only"
+                aria-hidden="true"
               />
               <button
                 ref={submitButtonRef}
