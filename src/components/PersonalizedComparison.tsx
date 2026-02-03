@@ -33,7 +33,7 @@ export default function PersonalizedComparison({
 
   // Sleep comparison
   if (personalData.sleepHours) {
-    const avgSleep = 8;
+    const avgSleep = 7; // Global average
     const yourSleepYears = (personalData.sleepHours / 24) * 365.25 * yearsAlive;
     const avgSleepYears = (avgSleep / 24) * 365.25 * yearsAlive;
     const diff = ((personalData.sleepHours - avgSleep) / avgSleep) * 100;
@@ -97,7 +97,7 @@ export default function PersonalizedComparison({
 
   // Work hours comparison
   if (personalData.workHoursPerWeek) {
-    const avgWorkHours = 40;
+    const avgWorkHours = 37; // OECD global average
     const workYears = Math.max(0, yearsAlive - 22); // Assuming work starts ~22
     const yourWorkHours = personalData.workHoursPerWeek * 52 * workYears;
     const avgWorkHoursTotal = avgWorkHours * 52 * workYears;
