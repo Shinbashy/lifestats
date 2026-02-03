@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { calculateLifeStats, calculateGenderStats, LifeStats, GenderStats, Gender, formatDate, formatNumber } from '@/lib/calculations';
+import { calculateLifeStats, calculateGenderStats, LifeStats, GenderStats, Gender, Country, COUNTRY_PROFILES, formatDate, formatNumber } from '@/lib/calculations';
 import StatCard, { UnitOption } from '@/components/StatCard';
 import ProgressBar from '@/components/ProgressBar';
 import BirthdayCountdown from '@/components/BirthdayCountdown';
@@ -15,6 +15,7 @@ function createUnits(conversions: { label: string; value: number; suffix?: strin
 export default function Home() {
   const [birthday, setBirthday] = useState<string>('');
   const [gender, setGender] = useState<Gender>(null);
+  const [country, setCountry] = useState<Country>('us');
   const [stats, setStats] = useState<LifeStats | null>(null);
   const [genderStats, setGenderStats] = useState<GenderStats | null>(null);
   const [birthdayDate, setBirthdayDate] = useState<Date | null>(null);
@@ -32,7 +33,7 @@ export default function Home() {
     }
     
     setBirthdayDate(date);
-    const calculatedStats = calculateLifeStats(date);
+    const calculatedStats = calculateLifeStats(date, new Date(), country);
     setStats(calculatedStats);
     setLiveSeconds(calculatedStats.secondsAlive);
     
@@ -41,7 +42,7 @@ export default function Home() {
       const gStats = calculateGenderStats(date, gender);
       setGenderStats(gStats);
     }
-  }, [birthday, gender]);
+  }, [birthday, gender, country]);
 
   // Live seconds counter
   useEffect(() => {
@@ -59,12 +60,12 @@ export default function Home() {
     if (!birthdayDate) return;
     
     const interval = setInterval(() => {
-      const newStats = calculateLifeStats(birthdayDate);
+      const newStats = calculateLifeStats(birthdayDate, new Date(), country);
       setStats(newStats);
     }, 60000);
 
     return () => clearInterval(interval);
-  }, [birthdayDate]);
+  }, [birthdayDate, country]);
 
   // Memoize unit conversions
   const unitConversions = useMemo(() => {
@@ -208,6 +209,34 @@ export default function Home() {
         { label: 'At Red Lights', value: stats.hoursAtRedLights, suffix: 'hours' },
         { label: 'At Red Lights', value: stats.hoursAtRedLights / 24, suffix: 'days', decimals: 1 },
       ]),
+      inLine: createUnits([
+        { label: 'Standing in Line', value: stats.hoursInLine, suffix: 'hours' },
+        { label: 'Standing in Line', value: stats.hoursInLine / 24, suffix: 'days', decimals: 1 },
+        { label: 'Standing in Line', value: stats.hoursInLine / 24 / 30, suffix: 'months', decimals: 1 },
+      ]),
+      transit: createUnits([
+        { label: 'On Transit', value: stats.hoursOnTransit, suffix: 'hours' },
+        { label: 'On Transit', value: stats.hoursOnTransit / 24, suffix: 'days', decimals: 1 },
+        { label: 'On Transit', value: stats.hoursOnTransit / 24 / 365.25, suffix: 'years', decimals: 2 },
+      ]),
+      driving: createUnits([
+        { label: 'Driving', value: stats.hoursDriving, suffix: 'hours' },
+        { label: 'Driving', value: stats.hoursDriving / 24, suffix: 'days', decimals: 1 },
+        { label: 'Driving', value: stats.hoursDriving / 24 / 365.25, suffix: 'years', decimals: 2 },
+      ]),
+      traffic: createUnits([
+        { label: 'In Traffic', value: stats.hoursInTraffic, suffix: 'hours' },
+        { label: 'In Traffic', value: stats.hoursInTraffic / 24, suffix: 'days', decimals: 1 },
+      ]),
+      screens: createUnits([
+        { label: 'On Screens', value: stats.hoursOnScreens, suffix: 'hours' },
+        { label: 'On Screens', value: stats.hoursOnScreens / 24, suffix: 'days', decimals: 1 },
+        { label: 'On Screens', value: stats.hoursOnScreens / 24 / 365.25, suffix: 'years', decimals: 2 },
+      ]),
+      bathing: createUnits([
+        { label: 'Bathing', value: stats.hoursBathing, suffix: 'hours' },
+        { label: 'Bathing', value: stats.hoursBathing / 24, suffix: 'days', decimals: 1 },
+      ]),
     };
   }, [stats]);
 
@@ -283,9 +312,28 @@ export default function Home() {
                   </button>
                 </div>
               </div>
+              
+              {/* Country selector */}
+              <div className="mt-4">
+                <label className="block text-sm text-gray-400 mb-2">
+                  Location <span className="text-emerald-400 text-xs">(adjusts lifestyle stats 🌍)</span>
+                </label>
+                <select
+                  value={country || 'us'}
+                  onChange={(e) => setCountry(e.target.value as Country)}
+                  tabIndex={5}
+                  className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white text-lg focus:outline-none focus:border-indigo-500 transition-colors"
+                >
+                  {Object.entries(COUNTRY_PROFILES).map(([code, profile]) => (
+                    <option key={code} value={code}>
+                      {profile.flag} {profile.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
               <button
                 ref={submitButtonRef}
-                tabIndex={5}
+                tabIndex={6}
                 type="submit"
                 className="btn-primary w-full mt-4 py-3 rounded-xl font-semibold text-white text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
               >
@@ -307,6 +355,7 @@ export default function Home() {
                   setBirthdayDate(null);
                   setBirthday('');
                   setGender(null);
+                  setCountry('us');
                 }}
                 className="text-sm text-gray-500 hover:text-indigo-400 transition-colors"
               >
@@ -524,14 +573,23 @@ export default function Home() {
             <div>
               <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
                 <span>⏰</span> Time Spent
+                <span className="text-xs text-emerald-400 bg-emerald-500/20 px-2 py-0.5 rounded-full">
+                  {COUNTRY_PROFILES[country || 'us'].flag} adjusted
+                </span>
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <StatCard icon="🍽️" label="Eating" value={stats.hoursEating} delay={34} units={unitConversions.eating} />
                 <StatCard icon="🚿" label="Showering" value={stats.hoursShowering} delay={35} units={unitConversions.showering} />
-                <StatCard icon="🚦" label="At Red Lights" value={stats.hoursAtRedLights} delay={36} units={unitConversions.redLights} />
+                <StatCard icon="🛁" label="Bathing" value={stats.hoursBathing} delay={36} units={unitConversions.bathing} />
+                <StatCard icon="🚶" label="Standing in Line" value={stats.hoursInLine} delay={37} units={unitConversions.inLine} />
+                <StatCard icon="🚇" label="On Transit" value={stats.hoursOnTransit} delay={38} units={unitConversions.transit} />
+                <StatCard icon="🚗" label="Driving" value={stats.hoursDriving} delay={39} units={unitConversions.driving} />
+                <StatCard icon="🚦" label="At Red Lights" value={stats.hoursAtRedLights} delay={40} units={unitConversions.redLights} />
+                <StatCard icon="🚙" label="In Traffic" value={stats.hoursInTraffic} delay={41} units={unitConversions.traffic} />
+                <StatCard icon="📱" label="On Screens" value={stats.hoursOnScreens} delay={42} units={unitConversions.screens} />
               </div>
               <p className="text-xs text-gray-500 mt-2 text-center">
-                * Red lights calculated from driving age (16+)
+                * Adjusted for {COUNTRY_PROFILES[country || 'us'].name} lifestyle. Driving stats from age 16+. Screens from smartphone era.
               </p>
             </div>
 

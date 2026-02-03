@@ -1,4 +1,135 @@
 export type Gender = 'male' | 'female' | null;
+export type Country = 'us' | 'jp' | 'uk' | 'de' | 'au' | 'ca' | 'fr' | 'kr' | null;
+
+export interface CountryProfile {
+  name: string;
+  flag: string;
+  stepsPerDay: number;
+  transitMinutesPerDay: number;
+  drivingMinutesPerDay: number;
+  coffeePerDay: number;
+  teaCupsPerDay: number;
+  bathsPerWeek: number;
+  lineWaitMinutesPerDay: number;
+  screenHoursPerDay: number;
+  trafficMinutesPerDay: number;
+  beerPerWeek: number;
+}
+
+export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
+  us: {
+    name: 'United States',
+    flag: '🇺🇸',
+    stepsPerDay: 5000,
+    transitMinutesPerDay: 10,
+    drivingMinutesPerDay: 50,
+    coffeePerDay: 2.7,
+    teaCupsPerDay: 0.3,
+    bathsPerWeek: 0.5,
+    lineWaitMinutesPerDay: 20,
+    screenHoursPerDay: 7,
+    trafficMinutesPerDay: 25,
+    beerPerWeek: 3,
+  },
+  jp: {
+    name: 'Japan',
+    flag: '🇯🇵',
+    stepsPerDay: 8500,
+    transitMinutesPerDay: 60,
+    drivingMinutesPerDay: 15,
+    coffeePerDay: 1.5,
+    teaCupsPerDay: 3,
+    bathsPerWeek: 7,
+    lineWaitMinutesPerDay: 15,
+    screenHoursPerDay: 5,
+    trafficMinutesPerDay: 10,
+    beerPerWeek: 2,
+  },
+  uk: {
+    name: 'United Kingdom',
+    flag: '🇬🇧',
+    stepsPerDay: 6500,
+    transitMinutesPerDay: 35,
+    drivingMinutesPerDay: 25,
+    coffeePerDay: 1.7,
+    teaCupsPerDay: 4,
+    bathsPerWeek: 1,
+    lineWaitMinutesPerDay: 25,
+    screenHoursPerDay: 6,
+    trafficMinutesPerDay: 20,
+    beerPerWeek: 4,
+  },
+  de: {
+    name: 'Germany',
+    flag: '🇩🇪',
+    stepsPerDay: 7000,
+    transitMinutesPerDay: 40,
+    drivingMinutesPerDay: 30,
+    coffeePerDay: 2.5,
+    teaCupsPerDay: 0.5,
+    bathsPerWeek: 0.5,
+    lineWaitMinutesPerDay: 15,
+    screenHoursPerDay: 5.5,
+    trafficMinutesPerDay: 18,
+    beerPerWeek: 5,
+  },
+  au: {
+    name: 'Australia',
+    flag: '🇦🇺',
+    stepsPerDay: 5500,
+    transitMinutesPerDay: 20,
+    drivingMinutesPerDay: 45,
+    coffeePerDay: 3.2,
+    teaCupsPerDay: 1,
+    bathsPerWeek: 0.3,
+    lineWaitMinutesPerDay: 15,
+    screenHoursPerDay: 6.5,
+    trafficMinutesPerDay: 22,
+    beerPerWeek: 3.5,
+  },
+  ca: {
+    name: 'Canada',
+    flag: '🇨🇦',
+    stepsPerDay: 5200,
+    transitMinutesPerDay: 25,
+    drivingMinutesPerDay: 45,
+    coffeePerDay: 3.0,
+    teaCupsPerDay: 0.8,
+    bathsPerWeek: 0.5,
+    lineWaitMinutesPerDay: 18,
+    screenHoursPerDay: 6.5,
+    trafficMinutesPerDay: 25,
+    beerPerWeek: 2.5,
+  },
+  fr: {
+    name: 'France',
+    flag: '🇫🇷',
+    stepsPerDay: 7200,
+    transitMinutesPerDay: 35,
+    drivingMinutesPerDay: 25,
+    coffeePerDay: 2.2,
+    teaCupsPerDay: 0.5,
+    bathsPerWeek: 0.5,
+    lineWaitMinutesPerDay: 20,
+    screenHoursPerDay: 5,
+    trafficMinutesPerDay: 20,
+    beerPerWeek: 2,
+  },
+  kr: {
+    name: 'South Korea',
+    flag: '🇰🇷',
+    stepsPerDay: 8000,
+    transitMinutesPerDay: 55,
+    drivingMinutesPerDay: 20,
+    coffeePerDay: 2.8,
+    teaCupsPerDay: 2,
+    bathsPerWeek: 3,
+    lineWaitMinutesPerDay: 12,
+    screenHoursPerDay: 8,
+    trafficMinutesPerDay: 15,
+    beerPerWeek: 4,
+  },
+};
 
 export interface GenderStats {
   // Adjusted based on gender
@@ -71,6 +202,12 @@ export interface LifeStats {
   hoursAtRedLights: number;
   hoursEating: number;
   hoursShowering: number;
+  hoursInLine: number;
+  hoursOnTransit: number;
+  hoursDriving: number;
+  hoursInTraffic: number;
+  hoursOnScreens: number;
+  hoursBathing: number;
   
   // World Events
   usPresidents: string[];
@@ -198,7 +335,9 @@ function interpolatePopulation(year: number): number {
   return POPULATION_DATA[POPULATION_DATA.length - 1].pop;
 }
 
-export function calculateLifeStats(birthday: Date, now: Date = new Date()): LifeStats {
+export function calculateLifeStats(birthday: Date, now: Date = new Date(), country: Country = 'us'): LifeStats {
+  // Get country profile (default to US)
+  const profile = COUNTRY_PROFILES[country || 'us'] || COUNTRY_PROFILES.us;
   const msAlive = now.getTime() - birthday.getTime();
   const secondsAlive = Math.floor(msAlive / 1000);
   const minutesAlive = Math.floor(secondsAlive / 60);
@@ -258,12 +397,12 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date()): Life
     }
   }
   
-  // Life stats
+  // Life stats (country-adjusted)
   const mealsEaten = Math.floor(daysAlive * MEALS_PER_DAY);
   const wordsSpoken = Math.floor(daysAlive * WORDS_PER_DAY);
-  const stepsWalked = Math.floor(daysAlive * STEPS_PER_DAY);
+  const stepsWalked = Math.floor(daysAlive * profile.stepsPerDay);
   
-  // Digital stats (era-aware)
+  // Digital stats (era-aware, country-adjusted screen time)
   const GOOGLE_START = 1998;
   const SMARTPHONE_ERA = 2010;
   const googleYears = Math.max(0, currentYearNum - Math.max(birthYearNum, GOOGLE_START));
@@ -274,20 +413,28 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date()): Life
   const photosTaken = Math.floor(smartphoneYears * 365.25 * PHOTOS_PER_DAY_SMARTPHONE);
   const hoursOfVideoWatched = Math.floor(smartphoneYears * 365.25 * VIDEO_HOURS_PER_DAY);
   
-  // Consumption stats
+  // Consumption stats (some country-adjusted)
   const chickensConsumed = Math.floor(yearsAlive * CHICKENS_PER_YEAR);
   const cowsWorthOfBeef = Math.round((yearsAlive * BEEF_LBS_PER_YEAR / COW_BEEF_LBS) * 100) / 100;
   const pizzasEaten = Math.floor(yearsAlive * PIZZAS_PER_YEAR);
   const gallonsOfWaterDrunk = Math.floor(daysAlive * WATER_GALLONS_PER_DAY);
-  // Coffee only counts from age 18
+  // Coffee only counts from age 18, country-adjusted
   const coffeeYears = Math.max(0, yearsAlive - 18);
-  const cupsOfCoffee = Math.floor(coffeeYears * 365.25 * COFFEE_CUPS_PER_DAY);
+  const cupsOfCoffee = Math.floor(coffeeYears * 365.25 * profile.coffeePerDay);
   
-  // Time spent stats (assuming adult with car for red lights, age 16+)
+  // Time spent stats (country-adjusted)
   const drivingYears = Math.max(0, yearsAlive - 16);
   const hoursAtRedLights = Math.floor(drivingYears * 365.25 * RED_LIGHT_MINUTES_PER_DAY / 60);
   const hoursEating = Math.floor(daysAlive * EATING_MINUTES_PER_DAY / 60);
   const hoursShowering = Math.floor(daysAlive * SHOWER_MINUTES_PER_DAY / 60);
+  
+  // New time spent stats (country-adjusted)
+  const hoursInLine = Math.floor(daysAlive * profile.lineWaitMinutesPerDay / 60);
+  const hoursOnTransit = Math.floor(daysAlive * profile.transitMinutesPerDay / 60);
+  const hoursDriving = Math.floor(drivingYears * 365.25 * profile.drivingMinutesPerDay / 60);
+  const hoursInTraffic = Math.floor(drivingYears * 365.25 * profile.trafficMinutesPerDay / 60);
+  const hoursOnScreens = Math.floor(smartphoneYears * 365.25 * profile.screenHoursPerDay);
+  const hoursBathing = Math.floor(daysAlive * profile.bathsPerWeek / 7 * 0.5); // 30 min per bath
   
   // US Presidents during lifetime
   const usPresidents = US_PRESIDENTS
@@ -383,6 +530,12 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date()): Life
     hoursAtRedLights,
     hoursEating,
     hoursShowering,
+    hoursInLine,
+    hoursOnTransit,
+    hoursDriving,
+    hoursInTraffic,
+    hoursOnScreens,
+    hoursBathing,
     
     // World Events
     usPresidents,
