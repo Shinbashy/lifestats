@@ -379,6 +379,19 @@ export default function Home() {
               💡 Tap any stat with ↻ to change units
             </div>
 
+            {/* Time Stats */}
+            <div>
+              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
+                <span>⏱️</span> Time Alive
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <StatCard icon="📅" label="Days" value={stats.daysAlive} delay={1} units={unitConversions.days} />
+                <StatCard icon="📆" label="Weeks" value={stats.weeksAlive} delay={2} />
+                <StatCard icon="⏰" label="Hours" value={stats.hoursAlive} delay={3} units={unitConversions.hours} />
+                <StatCard icon="🌅" label="Sunrises" value={stats.sunrisesWitnessed} delay={4} />
+              </div>
+            </div>
+
             {/* Birth Identity Card */}
             <div className="stat-card rounded-2xl p-6 border-2 border-purple-500/30">
               <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
@@ -594,19 +607,6 @@ export default function Home() {
                 )}
               </div>
             )}
-
-            {/* Time Stats */}
-            <div>
-              <h2 className="text-lg font-semibold text-gray-300 mb-4 flex items-center gap-2">
-                <span>⏱️</span> Time Alive
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <StatCard icon="📅" label="Days" value={stats.daysAlive} delay={1} units={unitConversions.days} />
-                <StatCard icon="📆" label="Weeks" value={stats.weeksAlive} delay={2} />
-                <StatCard icon="⏰" label="Hours" value={stats.hoursAlive} delay={3} units={unitConversions.hours} />
-                <StatCard icon="🌅" label="Sunrises" value={stats.sunrisesWitnessed} delay={4} />
-              </div>
-            </div>
 
             {/* Body Stats */}
             <div>
