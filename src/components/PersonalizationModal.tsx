@@ -156,10 +156,10 @@ export default function PersonalizationModal({ isOpen, onClose, onComplete }: Pe
                 <label className="block text-sm text-gray-400 mb-2">Activity Level</label>
                 <div className="grid grid-cols-2 gap-2">
                   {[
-                    { value: 'sedentary', label: '🪑 Sedentary', desc: 'Desk job, little exercise' },
-                    { value: 'moderate', label: '🚶 Moderate', desc: 'Some exercise' },
-                    { value: 'active', label: '🏃 Active', desc: 'Daily exercise' },
-                    { value: 'very_active', label: '💪 Very Active', desc: 'Athlete level' },
+                    { value: 'sedentary', label: '🪑 Sedentary', desc: 'Little to no exercise' },
+                    { value: 'moderate', label: '🚶 Moderate', desc: 'Light exercise 1-3x/week' },
+                    { value: 'active', label: '🏃 Active', desc: 'Exercise 4-5x/week' },
+                    { value: 'very_active', label: '💪 Very Active', desc: 'Intense daily exercise' },
                   ].map(opt => (
                     <button
                       key={opt.value}
@@ -298,7 +298,13 @@ export default function PersonalizationModal({ isOpen, onClose, onComplete }: Pe
                   ].map(opt => (
                     <button
                       key={opt.value}
-                      onClick={() => updateData({ workStyle: opt.value as PersonalData['workStyle'] })}
+                      onClick={() => {
+                        updateData({ 
+                          workStyle: opt.value as PersonalData['workStyle'],
+                          // Auto-set commute to 0 for remote
+                          ...(opt.value === 'remote' ? { commuteMinutes: 0 } : {})
+                        });
+                      }}
                       className={`flex-1 py-3 px-3 rounded-xl text-sm transition-all ${
                         data.workStyle === opt.value
                           ? 'bg-indigo-500/30 border-2 border-indigo-500 text-white'
@@ -333,17 +339,29 @@ export default function PersonalizationModal({ isOpen, onClose, onComplete }: Pe
 
               {/* Commute */}
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Daily Commute (round trip)</label>
+                <label className="block text-sm text-gray-400 mb-2">
+                  Daily Commute (round trip)
+                  {data.workStyle === 'remote' && (
+                    <span className="text-emerald-400 ml-2">✓ Remote - no commute!</span>
+                  )}
+                </label>
                 <div className="flex gap-3 items-center">
                   <input
                     type="number"
-                    placeholder="30"
-                    value={data.commuteMinutes || ''}
-                    onChange={e => updateData({ commuteMinutes: parseInt(e.target.value) || undefined })}
+                    min="0"
+                    placeholder="0"
+                    value={data.commuteMinutes !== undefined ? data.commuteMinutes : ''}
+                    onChange={e => {
+                      const val = e.target.value;
+                      updateData({ commuteMinutes: val === '' ? undefined : parseInt(val) });
+                    }}
                     className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-indigo-500"
                   />
                   <span className="text-gray-400">minutes</span>
                 </div>
+                {data.workStyle !== 'remote' && (
+                  <p className="text-xs text-gray-500 mt-1">Enter 0 if you work from home</p>
+                )}
               </div>
 
               {/* Industry */}
