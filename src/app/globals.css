@@ -46,6 +46,11 @@ body {
   box-shadow: 0 8px 30px rgba(99, 102, 241, 0.15);
 }
 
+/* Disable hover transform inside sortable grids — it interferes with drag positioning */
+.group\/sort .stat-card:hover {
+  transform: none;
+}
+
 /* Animated background */
 .animated-bg {
   background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #0a0a0f 100%);

@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // Allow local network access in dev
+  allowedDevOrigins: [
+    "192.168.68.66",
+    "192.168.68.1",
+  ],
   // Security headers
   async headers() {
     return [

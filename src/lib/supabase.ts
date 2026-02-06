@@ -75,7 +75,10 @@ export async function loadProfile(id: string): Promise<UserProfile | null> {
     .single();
   
   if (error) {
-    console.error('Error loading profile:', error);
+    // PGRST116 = no rows found, which is expected for new users
+    if (error.code !== 'PGRST116') {
+      console.error('Error loading profile:', error);
+    }
     return null;
   }
   

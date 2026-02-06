@@ -1,5 +1,5 @@
 export type Gender = 'male' | 'female' | null;
-export type Country = 'us' | 'jp' | 'uk' | 'de' | 'au' | 'ca' | 'fr' | 'kr' | null;
+export type Country = 'us' | 'jp' | 'uk' | 'de' | 'au' | 'ca' | 'fr' | 'kr' | 'cn' | 'ru' | null;
 
 export interface FoodItem {
   key: string;
@@ -210,6 +210,52 @@ export const COUNTRY_PROFILES: Record<string, CountryProfile> = {
       { key: 'friedchicken', icon: '🍗', label: 'Fried Chicken', perYear: 60 },
       { key: 'ramyeon', icon: '🍜', label: 'Ramyeon Packs', perYear: 80 },
       { key: 'soju', icon: '🍶', label: 'Soju Bottles', perYear: 70 },
+    ],
+  },
+  cn: {
+    name: 'China',
+    flag: '🇨🇳',
+    lifeExpectancy: 78,
+    stepsPerDay: 6200,
+    transitMinutesPerDay: 45,
+    drivingMinutesPerDay: 20,
+    coffeePerDay: 0.3,
+    teaCupsPerDay: 5,
+    bathsPerWeek: 2,
+    lineWaitMinutesPerDay: 25,
+    screenHoursPerDay: 6,
+    trafficMinutesPerDay: 30,
+    beerPerWeek: 2,
+    foods: [
+      { key: 'rice', icon: '🍚', label: 'Bowls of Rice', perYear: 600 },
+      { key: 'dumplings', icon: '🥟', label: 'Dumplings Eaten', perYear: 500 },
+      { key: 'noodles', icon: '🍜', label: 'Bowls of Noodles', perYear: 150 },
+      { key: 'hotpot', icon: '🍲', label: 'Hot Pot Meals', perYear: 24 },
+      { key: 'tofu', icon: '🧈', label: 'Tofu Dishes', perYear: 120 },
+      { key: 'baozi', icon: '🥮', label: 'Baozi (Buns)', perYear: 200 },
+    ],
+  },
+  ru: {
+    name: 'Russia',
+    flag: '🇷🇺',
+    lifeExpectancy: 72,
+    stepsPerDay: 5500,
+    transitMinutesPerDay: 50,
+    drivingMinutesPerDay: 25,
+    coffeePerDay: 1.0,
+    teaCupsPerDay: 4,
+    bathsPerWeek: 1,
+    lineWaitMinutesPerDay: 30,
+    screenHoursPerDay: 6,
+    trafficMinutesPerDay: 35,
+    beerPerWeek: 3,
+    foods: [
+      { key: 'borscht', icon: '🥣', label: 'Bowls of Borscht', perYear: 80 },
+      { key: 'pelmeni', icon: '🥟', label: 'Pelmeni Eaten', perYear: 300 },
+      { key: 'blini', icon: '🥞', label: 'Blini (Pancakes)', perYear: 60 },
+      { key: 'bread', icon: '🍞', label: 'Loaves of Bread', perYear: 120 },
+      { key: 'pickles', icon: '🥒', label: 'Pickled Cucumbers', perYear: 200 },
+      { key: 'vodka', icon: '🥃', label: 'Vodka Shots', perYear: 100 },
     ],
   },
 };
@@ -508,6 +554,9 @@ export interface LifeStats {
   sneezes: number;
   toiletHours: number;
   bloodRecycles: number;
+  yawns: number;
+  redBloodCellsProduced: number;
+  salivaProducedLiters: number;
   
   // Cosmic
   fullMoons: number;
@@ -585,6 +634,9 @@ const LAUGHS_PER_DAY = 15;
 const SNEEZES_PER_YEAR = 200;
 const TOILET_MINUTES_PER_DAY = 30; // ~3 years over lifetime
 const BLOOD_RECYCLES_PER_DAY = 1440; // Full cycle every minute
+const YAWNS_PER_DAY = 28; // Average person yawns ~28 times/day
+const SALIVA_LITERS_PER_DAY = 1.0; // ~1 liter of saliva per day
+const RED_BLOOD_CELLS_PER_SECOND = 2_400_000; // 2.4 million new RBCs every second
 
 // Digital era constants
 const GOOGLE_SEARCHES_PER_DAY = 8; // Average since widespread adoption
@@ -982,6 +1034,9 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date(), count
   const sneezes = Math.floor(yearsAlive * SNEEZES_PER_YEAR);
   const toiletHours = Math.floor(daysAlive * TOILET_MINUTES_PER_DAY / 60);
   const bloodRecycles = Math.floor(daysAlive * BLOOD_RECYCLES_PER_DAY);
+  const yawns = Math.floor(daysAlive * YAWNS_PER_DAY);
+  const redBloodCellsProduced = Math.floor(secondsAlive * RED_BLOOD_CELLS_PER_SECOND);
+  const salivaProducedLiters = Math.round(daysAlive * SALIVA_LITERS_PER_DAY);
   
   // Cosmic stats
   const sunrisesWitnessed = daysAlive;
@@ -1186,6 +1241,9 @@ export function calculateLifeStats(birthday: Date, now: Date = new Date(), count
     sneezes,
     toiletHours,
     bloodRecycles,
+    yawns,
+    redBloodCellsProduced,
+    salivaProducedLiters,
     
     // Cosmic
     fullMoons,

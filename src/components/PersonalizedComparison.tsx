@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { PersonalData } from './PersonalizationModal';
 import { LifeStats, COUNTRY_PROFILES, Country } from '@/lib/calculations';
+import SortableGrid from '@/components/SortableGrid';
 
 type CompareMode = 'average' | 'recommended';
 
@@ -413,6 +414,108 @@ export default function PersonalizedComparison({
     });
   }
 
+  // Alcohol comparison
+  if (personalData.alcoholFrequency) {
+    const alcoholLabels: Record<string, string> = {
+      never: 'Never',
+      occasionally: 'Occasionally',
+      weekly: 'Weekly',
+      daily: 'Daily',
+    };
+    
+    const alcoholOrder = ['never', 'occasionally', 'weekly', 'daily'];
+    const yourIndex = alcoholOrder.indexOf(personalData.alcoholFrequency);
+    
+    let highlight: 'good' | 'bad' | 'neutral';
+    let diffLabel: string | undefined;
+    
+    if (isRecommended) {
+      highlight = yourIndex <= 1 ? 'good' : yourIndex === 2 ? 'neutral' : 'bad';
+      diffLabel = yourIndex <= 1
+        ? '✓ Low risk drinking'
+        : yourIndex === 2
+          ? 'Moderate — monitor intake'
+          : '⚠️ Daily use increases health risks';
+    } else {
+      highlight = yourIndex <= 1 ? 'good' : yourIndex === 2 ? 'neutral' : 'bad';
+      diffLabel = yourIndex === 0 ? 'Below average consumption' 
+        : yourIndex === 1 ? 'Typical consumption'
+        : yourIndex === 2 ? 'Above average frequency'
+        : 'Well above average';
+    }
+    
+    // Estimate lifetime drinks
+    const drinkingYears = Math.max(0, yearsAlive - 21);
+    const drinksPerWeek: Record<string, number> = { never: 0, occasionally: 1, weekly: 4, daily: 10 };
+    const yourLifetimeDrinks = Math.floor(drinksPerWeek[personalData.alcoholFrequency] * 52 * drinkingYears);
+    
+    comparisons.push({
+      icon: '🍺',
+      label: 'Alcohol',
+      yours: alcoholLabels[personalData.alcoholFrequency],
+      baseline: isRecommended ? '≤ Occasional' : 'Occasionally',
+      unit: isRecommended ? '(CDC guideline)' : '(most common)',
+      highlight,
+      diffLabel,
+      insight: isRecommended ? 'CDC: ≤1 drink/day women, ≤2 men' : undefined,
+    });
+    
+    if (yourLifetimeDrinks > 0) {
+      comparisons.push({
+        icon: '🥂',
+        label: 'Est. Lifetime Drinks',
+        yours: yourLifetimeDrinks.toLocaleString(),
+        baseline: Math.floor(1 * 52 * drinkingYears).toLocaleString(),
+        unit: 'drinks',
+        highlight: 'neutral',
+      });
+    }
+  }
+
+  // Smoking status comparison
+  if (personalData.smokerStatus) {
+    const smokerLabels: Record<string, string> = { never: 'Never', former: 'Former', current: 'Current' };
+    
+    let highlight: 'good' | 'bad' | 'neutral';
+    let diffLabel: string | undefined;
+    
+    if (isRecommended) {
+      highlight = personalData.smokerStatus === 'never' ? 'good' : 
+                  personalData.smokerStatus === 'former' ? 'neutral' : 'bad';
+      diffLabel = personalData.smokerStatus === 'never' 
+        ? '✓ Smoke-free'
+        : personalData.smokerStatus === 'former'
+          ? 'Lungs recovering — great choice!'
+          : '⚠️ #1 preventable cause of death';
+    } else {
+      // ~12% of US adults smoke
+      highlight = personalData.smokerStatus === 'never' ? 'good' : 
+                  personalData.smokerStatus === 'former' ? 'neutral' : 'bad';
+      diffLabel = personalData.smokerStatus === 'never' 
+        ? 'Majority non-smoker'
+        : personalData.smokerStatus === 'former'
+          ? 'Joined the 88% non-smokers'
+          : 'Top 12% usage';
+    }
+    
+    comparisons.push({
+      icon: '🚬',
+      label: 'Smoking Status',
+      yours: smokerLabels[personalData.smokerStatus],
+      baseline: isRecommended ? 'Never' : 'Never (88%)',
+      unit: isRecommended ? '(WHO guideline)' : '(US adults)',
+      highlight,
+      diffLabel,
+      insight: isRecommended 
+        ? personalData.smokerStatus === 'former' 
+          ? 'After 10yrs, lung cancer risk halves' 
+          : personalData.smokerStatus === 'current'
+            ? 'Quitting at any age adds years'
+            : undefined
+        : undefined,
+    });
+  }
+
   if (comparisons.length === 0) {
     return null;
   }
@@ -468,51 +571,49 @@ export default function PersonalizedComparison({
         }
       </p>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <SortableGrid sectionKey={`stats-vs-${mode}`} className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {comparisons.map((item, i) => (
           <div 
             key={i} 
-            className={`rounded-xl p-4 border ${highlightBg[item.highlight || 'neutral']}`}
+            className={`rounded-xl p-4 border flex flex-col min-h-[160px] ${highlightBg[item.highlight || 'neutral']}`}
           >
             <div className="flex items-center gap-2 mb-3">
               <span className="text-xl">{item.icon}</span>
-              <span className="font-medium text-white">{item.label}</span>
+              <span className="font-medium text-white text-sm">{item.label}</span>
             </div>
             
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between flex-1">
               <div className="text-center flex-1">
-                <div className="text-2xl font-bold text-white">{item.yours}</div>
+                <div className="text-xl font-bold text-white truncate">{item.yours}</div>
                 <div className="text-xs text-indigo-400">YOURS</div>
               </div>
               
-              <div className="text-gray-600 px-3">vs</div>
+              <div className="text-gray-600 px-2 text-sm">vs</div>
               
               <div className="text-center flex-1">
-                <div className="text-2xl font-bold text-gray-500">{item.baseline}</div>
+                <div className="text-xl font-bold text-gray-500 truncate">{item.baseline}</div>
                 <div className="text-xs text-gray-500">
                   {isRecommended ? 'REC' : 'AVG'}
                 </div>
               </div>
             </div>
             
-            <div className="text-xs text-gray-400 mt-2 text-center">
-              {item.unit}
+            <div className="mt-auto pt-2 space-y-1">
+              <div className="text-xs text-gray-400 text-center">
+                {item.unit}
+              </div>
+              
+              <div className={`text-xs text-center min-h-[16px] ${item.diffLabel ? highlightColors[item.highlight || 'neutral'] : 'text-transparent'}`}>
+                {item.diffLabel || '\u00A0'}
+              </div>
+              
+              <div className={`text-xs text-center min-h-[16px] ${item.insight ? 'text-gray-500 italic' : 'text-transparent'}`}>
+                {item.insight || '\u00A0'}
+              </div>
             </div>
-            
-            {item.diffLabel && (
-              <div className={`text-xs mt-2 text-center ${highlightColors[item.highlight || 'neutral']}`}>
-                {item.diffLabel}
-              </div>
-            )}
-            
-            {item.insight && (
-              <div className="text-xs mt-1 text-center text-gray-500 italic">
-                {item.insight}
-              </div>
-            )}
           </div>
         ))}
-      </div>
+      </SortableGrid>
     </div>
   );
 }
