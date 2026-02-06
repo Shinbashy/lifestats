@@ -10,7 +10,7 @@ import LifeInWeeksGrid from '@/components/LifeInWeeksGrid';
 import PlanetaryAges from '@/components/PlanetaryAges';
 import CollapsibleSection from '@/components/CollapsibleSection';
 import SortableGrid from '@/components/SortableGrid';
-import LockedSection from '@/components/LockedSection';
+// LockedSection removed — everything free until premium features (PDF export, save/track) are built
 import PersonalizationModal, { PersonalData } from '@/components/PersonalizationModal';
 import PersonalizedComparison from '@/components/PersonalizedComparison';
 import { saveProfile, loadProfile, UserProfile } from '@/lib/supabase';
@@ -101,18 +101,18 @@ function createUnits(conversions: { label: string; value: number; suffix?: strin
 const currentYear = new Date().getFullYear();
 const yearOptions = Array.from({ length: currentYear - 1899 }, (_, i) => currentYear - i);
 const monthOptions = [
-  { value: '01', label: 'January' },
-  { value: '02', label: 'February' },
-  { value: '03', label: 'March' },
-  { value: '04', label: 'April' },
-  { value: '05', label: 'May' },
-  { value: '06', label: 'June' },
-  { value: '07', label: 'July' },
-  { value: '08', label: 'August' },
-  { value: '09', label: 'September' },
-  { value: '10', label: 'October' },
-  { value: '11', label: 'November' },
-  { value: '12', label: 'December' },
+  { value: '01', label: '1' },
+  { value: '02', label: '2' },
+  { value: '03', label: '3' },
+  { value: '04', label: '4' },
+  { value: '05', label: '5' },
+  { value: '06', label: '6' },
+  { value: '07', label: '7' },
+  { value: '08', label: '8' },
+  { value: '09', label: '9' },
+  { value: '10', label: '10' },
+  { value: '11', label: '11' },
+  { value: '12', label: '12' },
 ];
 
 // Get days in month
@@ -136,14 +136,27 @@ export default function Home() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showSavedToast, setShowSavedToast] = useState(false);
-  const [previewMode, setPreviewMode] = useState<'full' | 'guest' | 'account'>('guest');
+  // Future: previewMode for gating when premium features (PDF, save/track) are built
   const submitButtonRef = useRef<HTMLButtonElement>(null);
+  const dayRef = useRef<HTMLInputElement>(null);
+  const yearRef = useRef<HTMLInputElement>(null);
+  const countryRef = useRef<HTMLSelectElement>(null);
 
   // Calculate available days based on selected year/month
   const availableDays = useMemo(() => {
-    if (!birthYear || !birthMonth) return 31;
-    return getDaysInMonth(parseInt(birthYear), parseInt(birthMonth));
+    const month = parseInt(birthMonth);
+    if (!birthMonth || isNaN(month)) return 31;
+    // Use selected year for leap year accuracy, default to non-leap year
+    const year = birthYear ? parseInt(birthYear) : 2023;
+    return getDaysInMonth(year, month);
   }, [birthYear, birthMonth]);
+
+  // Reset day if it exceeds available days (e.g. picked 31 then switched to Feb)
+  useEffect(() => {
+    if (birthDay && parseInt(birthDay) > availableDays) {
+      setBirthDay('');
+    }
+  }, [availableDays, birthDay]);
 
   // Update birthday string when dropdowns change
   useEffect(() => {
@@ -455,39 +468,75 @@ export default function Home() {
                 When did your journey begin?
               </label>
               <div className="grid grid-cols-3 gap-2">
-                <select
-                  value={birthMonth}
-                  onChange={(e) => setBirthMonth(e.target.value)}
-                  className="bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-3 text-white text-base focus:outline-none focus:border-indigo-500 transition-colors"
-                  tabIndex={1}
-                >
-                  <option value="">Month</option>
-                  {monthOptions.map((m) => (
-                    <option key={m.value} value={m.value}>{m.label}</option>
-                  ))}
-                </select>
-                <select
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Month"
+                  maxLength={2}
+                  value={birthMonth ? String(parseInt(birthMonth)) : ''}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val === '') { setBirthMonth(''); return; }
+                    const num = parseInt(val);
+                    if (num >= 1 && num <= 12) {
+                      setBirthMonth(String(num).padStart(2, '0'));
+                      if (num > 1 || val.length === 2) dayRef.current?.focus();
+                    } else if (num === 0 && val.length === 1) {
+                      setBirthMonth('');
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const num = parseInt(e.target.value);
+                    if (isNaN(num) || num < 1 || num > 12) setBirthMonth('');
+                  }}
+                  className="bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-3 text-white text-base text-center focus:outline-none focus:border-indigo-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <input
+                  ref={dayRef}
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Day"
+                  maxLength={2}
                   value={birthDay}
-                  onChange={(e) => setBirthDay(e.target.value)}
-                  className="bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-3 text-white text-base focus:outline-none focus:border-indigo-500 transition-colors"
-                  tabIndex={2}
-                >
-                  <option value="">Day</option>
-                  {Array.from({ length: availableDays }, (_, i) => i + 1).map((d) => (
-                    <option key={d} value={d}>{d}</option>
-                  ))}
-                </select>
-                <select
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val === '') { setBirthDay(''); return; }
+                    const num = parseInt(val);
+                    if (num >= 1 && num <= availableDays) {
+                      setBirthDay(val);
+                      if (num > 3 || val.length === 2) yearRef.current?.focus();
+                    } else if (num === 0 && val.length === 1) {
+                      setBirthDay('');
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const num = parseInt(e.target.value);
+                    if (isNaN(num) || num < 1 || num > availableDays) setBirthDay('');
+                  }}
+                  className="bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-3 text-white text-base text-center focus:outline-none focus:border-indigo-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+                <input
+                  ref={yearRef}
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Year"
+                  maxLength={4}
                   value={birthYear}
-                  onChange={(e) => setBirthYear(e.target.value)}
-                  className="bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-3 text-white text-base focus:outline-none focus:border-indigo-500 transition-colors"
-                  tabIndex={3}
-                >
-                  <option value="">Year</option>
-                  {yearOptions.map((y) => (
-                    <option key={y} value={y}>{y}</option>
-                  ))}
-                </select>
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/\D/g, '');
+                    if (val === '') { setBirthYear(''); return; }
+                    if (val.length <= 4) {
+                      setBirthYear(val);
+                      if (val.length === 4) document.getElementById('gender-male')?.focus();
+                    }
+                  }}
+                  onBlur={(e) => {
+                    const val = e.target.value;
+                    const num = parseInt(val);
+                    if (isNaN(num) || num < 1900 || num > new Date().getFullYear()) setBirthYear('');
+                  }}
+                  className="bg-gray-800/50 border border-gray-700 rounded-xl px-3 py-3 text-white text-base text-center focus:outline-none focus:border-indigo-500 transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
               </div>
               
               {/* Gender selector - Premium feature */}
@@ -499,8 +548,7 @@ export default function Home() {
                   <button
                     id="gender-male"
                     type="button"
-                    tabIndex={4}
-                    onClick={() => setGender(gender === 'male' ? null : 'male')}
+                    onClick={() => { setGender(gender === 'male' ? null : 'male'); countryRef.current?.focus(); }}
                     className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
                       gender === 'male'
                         ? 'bg-blue-500/30 border-2 border-blue-500 text-blue-300'
@@ -512,8 +560,7 @@ export default function Home() {
                   <button
                     id="gender-female"
                     type="button"
-                    tabIndex={5}
-                    onClick={() => setGender(gender === 'female' ? null : 'female')}
+                    onClick={() => { setGender(gender === 'female' ? null : 'female'); countryRef.current?.focus(); }}
                     className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
                       gender === 'female'
                         ? 'bg-pink-500/30 border-2 border-pink-500 text-pink-300'
@@ -531,9 +578,9 @@ export default function Home() {
                   Location <span className="text-emerald-400 text-xs">(adjusts lifestyle stats 🌍)</span>
                 </label>
                 <select
+                  ref={countryRef}
                   value={country || 'us'}
                   onChange={(e) => setCountry(e.target.value as Country)}
-                  tabIndex={6}
                   className="w-full bg-gray-800/50 border border-gray-700 rounded-xl px-4 py-3 text-white text-lg focus:outline-none focus:border-indigo-500 transition-colors"
                 >
                   {Object.entries(COUNTRY_PROFILES).map(([code, profile]) => (
@@ -545,7 +592,6 @@ export default function Home() {
               </div>
               <button
                 ref={submitButtonRef}
-                tabIndex={7}
                 type="submit"
                 className="btn-primary w-full mt-4 py-3 rounded-xl font-semibold text-white text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
               >
@@ -571,6 +617,10 @@ export default function Home() {
                   setBirthDay('');
                   setGender(null);
                   setCountry('us');
+                  setPersonalData(null);
+                  setProfileId(null);
+                  localStorage.removeItem('lifestats_profile_id');
+                  localStorage.removeItem('lifestats_partial_data');
                 }}
                 className="text-sm text-gray-500 hover:text-indigo-400 transition-colors"
               >
@@ -661,25 +711,9 @@ export default function Home() {
               />
             )}
 
-            {/* Preview Mode Toggle (dev only - remove before prod) */}
-            <div className="flex items-center gap-2 mb-6 p-3 rounded-lg bg-gray-800/50 border border-gray-700/50">
-              <span className="text-xs text-gray-400 mr-2">Preview as:</span>
-              {(['guest', 'account', 'full'] as const).map((mode) => (
-                <button
-                  key={mode}
-                  onClick={() => setPreviewMode(mode)}
-                  className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                    previewMode === mode
-                      ? mode === 'full' ? 'bg-amber-600 text-white' : mode === 'account' ? 'bg-blue-600 text-white' : 'bg-gray-600 text-white'
-                      : 'text-gray-400 hover:text-white hover:bg-gray-700'
-                  }`}
-                >
-                  {mode === 'guest' ? '👤 New Visitor' : mode === 'account' ? '🔓 Free Account' : '⭐ Premium'}
-                </button>
-              ))}
-            </div>
+            {/* Future: Premium upsell banner for PDF export, save & track, compare with friends */}
 
-            {/* === 1. WHO YOU ARE === */}
+            {/* === ALL STATS — Free for everyone === */}
 
             {/* Time Alive */}
             <CollapsibleSection title="Time Alive" icon="⏱️">
@@ -747,93 +781,6 @@ export default function Home() {
                 </div>
               </div>
             </CollapsibleSection>
-
-            {/* Famous Birthday Twins [ACCOUNT] */}
-            <LockedSection title="Famous Birthday Twins" icon="🎂" tier="account" isUnlocked={previewMode === 'account' || previewMode === 'full'}>
-            {stats.birthInfo.famousBirthdays.length > 0 && (
-              <CollapsibleSection title="Famous Birthday Twins" icon="🎂">
-                <div className="stat-card rounded-2xl p-6">
-                  <div className="flex flex-wrap gap-3 justify-center">
-                    {stats.birthInfo.famousBirthdays.map((celeb, i) => (
-                      <div key={i} className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2 text-center">
-                        <div className="text-white font-medium">{celeb.name}</div>
-                        <div className="text-xs text-gray-400">{celeb.desc} • {celeb.year}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CollapsibleSection>
-            )}
-            </LockedSection>
-
-            {/* Year You Were Born [ACCOUNT] */}
-            <LockedSection title={`The Year You Were Born (${birthdayDate.getFullYear()})`} icon="📅" tier="account" isUnlocked={previewMode === 'account' || previewMode === 'full'}>
-            {stats.birthInfo.birthYearContext.song && (
-              <CollapsibleSection title={`The Year You Were Born (${birthdayDate.getFullYear()})`} icon="📅">
-                <div className="stat-card rounded-2xl p-6">
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {stats.birthInfo.birthYearContext.song && (
-                      <div className="bg-gray-800/50 rounded-xl p-4">
-                        <div className="text-2xl mb-1">🎵</div>
-                        <div className="text-xs text-gray-400 mb-1">#1 Song</div>
-                        <div className="text-sm text-white">{stats.birthInfo.birthYearContext.song}</div>
-                      </div>
-                    )}
-                    {stats.birthInfo.birthYearContext.movie && (
-                      <div className="bg-gray-800/50 rounded-xl p-4">
-                        <div className="text-2xl mb-1">🎬</div>
-                        <div className="text-xs text-gray-400 mb-1">Top Movie</div>
-                        <div className="text-sm text-white">{stats.birthInfo.birthYearContext.movie}</div>
-                      </div>
-                    )}
-                    {stats.birthInfo.birthYearContext.event && (
-                      <div className="bg-gray-800/50 rounded-xl p-4">
-                        <div className="text-2xl mb-1">📰</div>
-                        <div className="text-xs text-gray-400 mb-1">Big Event</div>
-                        <div className="text-sm text-white">{stats.birthInfo.birthYearContext.event}</div>
-                      </div>
-                    )}
-                    {stats.birthInfo.birthYearContext.price_gas && (
-                      <div className="bg-gray-800/50 rounded-xl p-4">
-                        <div className="text-2xl mb-1">⛽</div>
-                        <div className="text-xs text-gray-400 mb-1">Gas Price</div>
-                        <div className="text-sm text-white">${stats.birthInfo.birthYearContext.price_gas?.toFixed(2)}/gal</div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CollapsibleSection>
-            )}
-            </LockedSection>
-
-            {/* Tech Milestones [ACCOUNT] */}
-            <LockedSection title="Tech Milestones in Your Lifetime" icon="💻" tier="account" isUnlocked={previewMode === 'account' || previewMode === 'full'}>
-            {stats.birthInfo.techTimeline.length > 0 && (
-              <CollapsibleSection title="Tech Milestones in Your Lifetime" icon="💻">
-                <div className="stat-card rounded-2xl p-6">
-                  <div className="relative">
-                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-cyan-500 to-purple-500"></div>
-                    <div className="space-y-3">
-                      {stats.birthInfo.techTimeline.slice(0, 8).map((tech, i) => (
-                        <div key={i} className="flex items-center gap-4 pl-8 relative">
-                          <div className="absolute left-2.5 w-3 h-3 bg-cyan-500 rounded-full border-2 border-gray-900"></div>
-                          <div className="text-xl">{tech.emoji}</div>
-                          <div className="flex-1">
-                            <span className="text-white font-medium">{tech.event}</span>
-                            <span className="text-gray-400 text-sm ml-2">
-                              ({tech.year} • age {tech.ageAtEvent})
-                            </span>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CollapsibleSection>
-            )}
-            </LockedSection>
-
-            {/* === 2. YOUR BODY === */}
 
             {/* Body Stats */}
             <CollapsibleSection title="Your Body" icon="🧬">
@@ -935,8 +882,6 @@ export default function Home() {
               </CollapsibleSection>
             )}
 
-            {/* === 3. THE COSMOS === */}
-
             {/* Cosmic Journey */}
             <CollapsibleSection title="Cosmic Journey" icon="🚀">
               <SortableGrid sectionKey="cosmic-journey" className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -959,10 +904,106 @@ export default function Home() {
               <PlanetaryAges planetaryAges={stats.planetaryAges} />
             </CollapsibleSection>
 
-            {/* === 4. YOUR LIFESTYLE === */}
+            {/* Milestone Badges */}
+            {(stats.isInBillionClub || stats.isIn10kClub) && (
+              <div className="flex flex-wrap justify-center gap-3">
+                {stats.isInBillionClub && (
+                  <div className="stat-card rounded-full px-6 py-3 flex items-center justify-center gap-2 border-2 border-yellow-500/50 min-w-[260px]">
+                    <span className="text-2xl">🏆</span>
+                    <span className="text-yellow-300 font-bold">BILLION SECONDS CLUB</span>
+                  </div>
+                )}
+                {stats.isIn10kClub && (
+                  <div className="stat-card rounded-full px-6 py-3 flex items-center justify-center gap-2 border-2 border-emerald-500/50 min-w-[260px]">
+                    <span className="text-2xl">🎯</span>
+                    <span className="text-emerald-300 font-bold">10,000 DAYS CLUB</span>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* === Extended Stats === */}
+
+            {/* Famous Birthday Twins [ACCOUNT] */}
+            {stats.birthInfo.famousBirthdays.length > 0 && (
+              <CollapsibleSection title="Famous Birthday Twins" icon="🎂">
+                <div className="stat-card rounded-2xl p-6">
+                  <div className="flex flex-wrap gap-3 justify-center">
+                    {stats.birthInfo.famousBirthdays.map((celeb, i) => (
+                      <div key={i} className="bg-amber-500/10 border border-amber-500/30 rounded-xl px-4 py-2 text-center">
+                        <div className="text-white font-medium">{celeb.name}</div>
+                        <div className="text-xs text-gray-400">{celeb.desc} • {celeb.year}</div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CollapsibleSection>
+            )}
+
+            {/* Year You Were Born [ACCOUNT] */}
+            {stats.birthInfo.birthYearContext.song && (
+              <CollapsibleSection title={`The Year You Were Born (${birthdayDate.getFullYear()})`} icon="📅">
+                <div className="stat-card rounded-2xl p-6">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {stats.birthInfo.birthYearContext.song && (
+                      <div className="bg-gray-800/50 rounded-xl p-4">
+                        <div className="text-2xl mb-1">🎵</div>
+                        <div className="text-xs text-gray-400 mb-1">#1 Song</div>
+                        <div className="text-sm text-white">{stats.birthInfo.birthYearContext.song}</div>
+                      </div>
+                    )}
+                    {stats.birthInfo.birthYearContext.movie && (
+                      <div className="bg-gray-800/50 rounded-xl p-4">
+                        <div className="text-2xl mb-1">🎬</div>
+                        <div className="text-xs text-gray-400 mb-1">Top Movie</div>
+                        <div className="text-sm text-white">{stats.birthInfo.birthYearContext.movie}</div>
+                      </div>
+                    )}
+                    {stats.birthInfo.birthYearContext.event && (
+                      <div className="bg-gray-800/50 rounded-xl p-4">
+                        <div className="text-2xl mb-1">📰</div>
+                        <div className="text-xs text-gray-400 mb-1">Big Event</div>
+                        <div className="text-sm text-white">{stats.birthInfo.birthYearContext.event}</div>
+                      </div>
+                    )}
+                    {stats.birthInfo.birthYearContext.price_gas && (
+                      <div className="bg-gray-800/50 rounded-xl p-4">
+                        <div className="text-2xl mb-1">⛽</div>
+                        <div className="text-xs text-gray-400 mb-1">Gas Price</div>
+                        <div className="text-sm text-white">${stats.birthInfo.birthYearContext.price_gas?.toFixed(2)}/gal</div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </CollapsibleSection>
+            )}
+
+            {/* Tech Milestones [ACCOUNT] */}
+            {stats.birthInfo.techTimeline.length > 0 && (
+              <CollapsibleSection title="Tech Milestones in Your Lifetime" icon="💻">
+                <div className="stat-card rounded-2xl p-6">
+                  <div className="relative">
+                    <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gradient-to-b from-cyan-500 to-purple-500"></div>
+                    <div className="space-y-3">
+                      {stats.birthInfo.techTimeline.slice(0, 8).map((tech, i) => (
+                        <div key={i} className="flex items-center gap-4 pl-8 relative">
+                          <div className="absolute left-2.5 w-3 h-3 bg-cyan-500 rounded-full border-2 border-gray-900"></div>
+                          <div className="text-xl">{tech.emoji}</div>
+                          <div className="flex-1">
+                            <span className="text-white font-medium">{tech.event}</span>
+                            <span className="text-gray-400 text-sm ml-2">
+                              ({tech.year} • age {tech.ageAtEvent})
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </CollapsibleSection>
+            )}
 
             {/* Digital Life [ACCOUNT] */}
-            <LockedSection title="Digital Life" icon="📱" tier="account" isUnlocked={previewMode === 'account' || previewMode === 'full'}>
             <CollapsibleSection title="Digital Life" icon="📱">
               <SortableGrid sectionKey="digital-life" className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <StatCard icon="🔍" label="Google Searches" value={stats.googleSearches} delay={29} units={unitConversions.googleSearches} />
@@ -974,10 +1015,62 @@ export default function Home() {
                 * Calculated from internet era (1998) and smartphone era (2010)
               </p>
             </CollapsibleSection>
-            </LockedSection>
+
+            {/* Achievements [ACCOUNT] */}
+            <CollapsibleSection title="Achievements" icon="🏅">
+              <div className="stat-card rounded-2xl p-6">
+                <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
+                  {stats.achievements.map((achievement, i) => (
+                    <div 
+                      key={i} 
+                      className={`rounded-xl p-3 text-center transition-all flex flex-col items-center justify-center min-h-[90px] ${
+                        achievement.earned 
+                          ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/50' 
+                          : 'bg-gray-800/30 border border-gray-700/50 opacity-50'
+                      }`}
+                    >
+                      <div className={`text-2xl mb-1 ${!achievement.earned && 'grayscale'}`}>
+                        {achievement.emoji}
+                      </div>
+                      <div className={`text-xs font-medium leading-tight ${achievement.earned ? 'text-white' : 'text-gray-500'}`}>
+                        {achievement.name}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </CollapsibleSection>
+
+            {/* Upcoming Milestones [ACCOUNT] */}
+            {stats.futureMilestones.length > 0 && (
+              <CollapsibleSection title="Upcoming Milestones" icon="🎯">
+                <div className="stat-card rounded-2xl p-6 border-2 border-cyan-500/30">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {stats.futureMilestones.slice(0, 4).map((milestone, i) => (
+                      <div key={i} className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-xl p-4 border border-cyan-500/20">
+                        <div className="flex items-center gap-3 mb-2">
+                          <span className="text-2xl">{milestone.emoji}</span>
+                          <div>
+                            <div className="font-bold text-white">{milestone.name}</div>
+                            <div className="text-xs text-gray-400">{milestone.description}</div>
+                          </div>
+                        </div>
+                        <div className="text-2xl font-bold text-cyan-300">
+                          {milestone.daysUntil.toLocaleString()} days
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          📅 {formatDate(milestone.date)}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </CollapsibleSection>
+            )}
+
+            {/* === Lifestyle Stats === */}
 
             {/* Consumption [PREMIUM] */}
-            <LockedSection title="Consumption" icon="🍽️" tier="premium" isUnlocked={previewMode === 'full'} badge={`${COUNTRY_PROFILES[country || 'us'].flag} local cuisine`} badgeColor="emerald">
             <CollapsibleSection title="Consumption" icon="🍽️" badge={`${COUNTRY_PROFILES[country || 'us'].flag} local cuisine`} badgeColor="emerald">
               <SortableGrid sectionKey="consumption" className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {stats.foodStats.map((food, index) => (
@@ -999,10 +1092,8 @@ export default function Home() {
                 * Based on {COUNTRY_PROFILES[country || 'us'].name} averages. Coffee counted from age 18+.
               </p>
             </CollapsibleSection>
-            </LockedSection>
 
             {/* Time Spent [PREMIUM] */}
-            <LockedSection title="Time Spent" icon="⏰" tier="premium" isUnlocked={previewMode === 'full'} badge={`${COUNTRY_PROFILES[country || 'us'].flag} adjusted`} badgeColor="emerald">
             <CollapsibleSection title="Time Spent" icon="⏰" badge={`${COUNTRY_PROFILES[country || 'us'].flag} adjusted`} badgeColor="emerald">
               <SortableGrid sectionKey="time-spent" className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 <StatCard icon="🍽️" label="Eating" value={stats.hoursEating} delay={42} units={unitConversions.eating} />
@@ -1019,12 +1110,8 @@ export default function Home() {
                 * Adjusted for {COUNTRY_PROFILES[country || 'us'].name} lifestyle. Driving stats from age 16+. Screens from smartphone era.
               </p>
             </CollapsibleSection>
-            </LockedSection>
-
-            {/* === 5. THE WORLD === */}
 
             {/* World Events [PREMIUM] */}
-            <LockedSection title="World Events" icon="🏛️" tier="premium" isUnlocked={previewMode === 'full'}>
             <CollapsibleSection title="World Events" icon="🏛️" defaultOpen={false}>
               <div className="stat-card rounded-2xl p-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -1053,10 +1140,8 @@ export default function Home() {
                 </div>
               </div>
             </CollapsibleSection>
-            </LockedSection>
 
             {/* Your World [PREMIUM] */}
-            <LockedSection title="Your World" icon="🌍" tier="premium" isUnlocked={previewMode === 'full'}>
             <CollapsibleSection title="Your World" icon="🌍" defaultOpen={false}>
               <div className="stat-card rounded-2xl p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -1080,85 +1165,8 @@ export default function Home() {
                 </div>
               </div>
             </CollapsibleSection>
-            </LockedSection>
 
-            {/* === 6. WHAT'S AHEAD === */}
-
-            {/* Achievements [ACCOUNT] */}
-            <LockedSection title="Achievements" icon="🏅" tier="account" isUnlocked={previewMode === 'account' || previewMode === 'full'}>
-            <CollapsibleSection title="Achievements" icon="🏅">
-              <div className="stat-card rounded-2xl p-6">
-                <div className="grid grid-cols-3 md:grid-cols-4 gap-3">
-                  {stats.achievements.map((achievement, i) => (
-                    <div 
-                      key={i} 
-                      className={`rounded-xl p-3 text-center transition-all ${
-                        achievement.earned 
-                          ? 'bg-gradient-to-br from-amber-500/20 to-orange-500/20 border border-amber-500/50' 
-                          : 'bg-gray-800/30 border border-gray-700/50 opacity-50'
-                      }`}
-                    >
-                      <div className={`text-2xl mb-1 ${!achievement.earned && 'grayscale'}`}>
-                        {achievement.emoji}
-                      </div>
-                      <div className={`text-xs font-medium ${achievement.earned ? 'text-white' : 'text-gray-500'}`}>
-                        {achievement.name}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </CollapsibleSection>
-            </LockedSection>
-
-            {/* Upcoming Milestones [ACCOUNT] */}
-            <LockedSection title="Upcoming Milestones" icon="🎯" tier="account" isUnlocked={previewMode === 'account' || previewMode === 'full'}>
-            {stats.futureMilestones.length > 0 && (
-              <CollapsibleSection title="Upcoming Milestones" icon="🎯">
-                <div className="stat-card rounded-2xl p-6 border-2 border-cyan-500/30">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {stats.futureMilestones.slice(0, 4).map((milestone, i) => (
-                      <div key={i} className="bg-gradient-to-r from-cyan-500/10 to-purple-500/10 rounded-xl p-4 border border-cyan-500/20">
-                        <div className="flex items-center gap-3 mb-2">
-                          <span className="text-2xl">{milestone.emoji}</span>
-                          <div>
-                            <div className="font-bold text-white">{milestone.name}</div>
-                            <div className="text-xs text-gray-400">{milestone.description}</div>
-                          </div>
-                        </div>
-                        <div className="text-2xl font-bold text-cyan-300">
-                          {milestone.daysUntil.toLocaleString()} days
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          📅 {formatDate(milestone.date)}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </CollapsibleSection>
-            )}
-            </LockedSection>
-
-            {/* Milestone Badges */}
-            {(stats.isInBillionClub || stats.isIn10kClub) && (
-              <div className="flex flex-wrap justify-center gap-3">
-                {stats.isInBillionClub && (
-                  <div className="stat-card rounded-full px-6 py-3 flex items-center gap-2 border-2 border-yellow-500/50">
-                    <span className="text-2xl">🏆</span>
-                    <span className="text-yellow-300 font-bold">BILLION SECONDS CLUB</span>
-                  </div>
-                )}
-                {stats.isIn10kClub && (
-                  <div className="stat-card rounded-full px-6 py-3 flex items-center gap-2 border-2 border-emerald-500/50">
-                    <span className="text-2xl">🎯</span>
-                    <span className="text-emerald-300 font-bold">10,000 DAYS CLUB</span>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* === 7. REFLECTION === */}
+            {/* === 6. REFLECTION === */}
 
             {/* Life in Weeks */}
             <CollapsibleSection title="Your Life in Weeks" icon="📊" defaultOpen={false}>
@@ -1278,6 +1286,17 @@ export default function Home() {
           }}
         />
       </div>
+      {/* Footer */}
+      <footer className="mt-16 pb-8 text-center text-xs text-gray-600">
+        <div className="flex items-center justify-center gap-4">
+          <a href="/privacy" className="hover:text-gray-400 transition-colors">Privacy Policy</a>
+          <span>•</span>
+          <a href="/terms" className="hover:text-gray-400 transition-colors">Terms of Service</a>
+          <span>•</span>
+          <span>© {new Date().getFullYear()} LifeStats</span>
+        </div>
+        <p className="mt-2 text-gray-700">All statistics are estimates for entertainment purposes only.</p>
+      </footer>
     </main>
   );
 }

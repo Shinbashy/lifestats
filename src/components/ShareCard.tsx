@@ -4,6 +4,8 @@ import { useRef, useState } from 'react';
 import html2canvas from 'html2canvas';
 import { LifeStats, formatNumber, generateShareText } from '@/lib/calculations';
 
+const SITE_URL = 'https://getlifestats.com';
+
 interface ShareCardProps {
   stats: LifeStats;
   birthday: Date;
@@ -72,7 +74,7 @@ export default function ShareCard({ stats, birthday }: ShareCardProps) {
     const statText = getStatText();
     const text = `${statText}\n\nCalculate your life stats 👇`;
     
-    const url = encodeURIComponent('https://lifestats-eight.vercel.app');
+    const url = encodeURIComponent('https://getlifestats.com');
     const encodedText = encodeURIComponent(text);
     window.open(`https://twitter.com/intent/tweet?text=${encodedText}&url=${url}`, '_blank');
   };
@@ -152,57 +154,51 @@ export default function ShareCard({ stats, birthday }: ShareCardProps) {
       {/* Quick share buttons */}
       <div className="flex flex-wrap gap-3 mb-6">
         <button
-          onClick={handleCopyText}
-          className="btn-primary px-5 py-2.5 rounded-xl font-semibold text-white flex items-center gap-2 text-sm"
-        >
-          {copied ? (
-            <>
-              <span>✓</span> Copied!
-            </>
-          ) : (
-            <>
-              <span>📋</span> Copy Stats
-            </>
-          )}
-        </button>
-        
-        <button
           onClick={handleTwitterShare}
           className="px-5 py-2.5 rounded-xl font-semibold text-white bg-black hover:bg-gray-900 transition-colors flex items-center gap-2 text-sm border border-gray-700"
         >
           <span>𝕏</span> Post to X
         </button>
-        
+
         <button
           onClick={() => setShowCard(!showCard)}
           className="px-5 py-2.5 rounded-xl font-semibold text-white border border-gray-700 hover:border-indigo-500 transition-colors flex items-center gap-2 text-sm"
         >
           <span>🎴</span> {showCard ? 'Hide' : 'Create'} Image
         </button>
+
+        {/* Copy & PDF — gated for future accounts */}
+        <div className="relative group">
+          <button
+            disabled
+            className="px-5 py-2.5 rounded-xl font-semibold text-gray-500 flex items-center gap-2 text-sm border border-gray-700/50 bg-gray-800/50 cursor-not-allowed"
+          >
+            <span>📋</span> Copy Stats
+            <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full">Account</span>
+          </button>
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            Create a free account to copy stats
+          </div>
+        </div>
+
+        <div className="relative group">
+          <button
+            disabled
+            className="px-5 py-2.5 rounded-xl font-semibold text-gray-500 flex items-center gap-2 text-sm border border-gray-700/50 bg-gray-800/50 cursor-not-allowed"
+          >
+            <span>📄</span> Print PDF
+            <span className="text-[10px] bg-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded-full">Account</span>
+          </button>
+          <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-1.5 rounded-lg bg-gray-800 border border-gray-700 text-xs text-gray-300 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+            Create a free account to export PDF
+          </div>
+        </div>
+
       </div>
 
+      {/* Basic image creator — free with limited stats */}
       {showCard && (
         <div className="mt-4 space-y-4">
-          {/* Stat selector */}
-          <div>
-            <label className="text-xs text-gray-400 mb-2 block">Choose a stat to feature:</label>
-            <div className="flex flex-wrap gap-2">
-              {STAT_OPTIONS.map(opt => (
-                <button
-                  key={opt.id}
-                  onClick={() => setSelectedStat(opt.id)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                    selectedStat === opt.id
-                      ? 'bg-indigo-500 text-white'
-                      : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
-                  }`}
-                >
-                  {opt.icon} {opt.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Template selector */}
           <div>
             <label className="text-xs text-gray-400 mb-2 block">Style:</label>
@@ -223,86 +219,56 @@ export default function ShareCard({ stats, birthday }: ShareCardProps) {
             </div>
           </div>
 
-          {/* Card Preview - using inline styles for html2canvas compatibility */}
-          <div 
+          {/* Card Preview — basic overview only (full detail requires account) */}
+          <div
             ref={cardRef}
             className="rounded-2xl p-8 max-w-md mx-auto"
             style={{ width: '400px', minHeight: '400px', ...style.bgStyle }}
           >
-            {/* Single stat card */}
-            {singleStat ? (
-              <div className="flex flex-col items-center justify-center h-full text-center py-8">
-                <div className="text-6xl mb-4">{singleStat.icon}</div>
-                <div className="text-5xl font-black mb-2" style={{ color: style.textColor }}>
-                  {singleStat.value}
-                </div>
-                <div className="text-lg" style={{ color: style.accentColor }}>
-                  {singleStat.label}
-                </div>
-                <div className="text-sm mt-4" style={{ color: style.accentColor }}>
-                  in {age} years on Earth
-                </div>
-                <div className="mt-8 text-xs" style={{ color: style.accentColor, opacity: 0.7 }}>
-                  lifestats-eight.vercel.app
-                </div>
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold mb-2" style={{ color: style.textColor }}>My Life in Numbers</h3>
+              <p className="text-sm" style={{ color: style.accentColor }}>
+                {age} years on Earth
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 text-center">
+              <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
+                <div className="text-xl mb-1">💓</div>
+                <div className="text-lg font-bold" style={{ color: style.textColor }}>{formatNumber(stats.heartbeats)}</div>
+                <div className="text-[10px]" style={{ color: style.accentColor }}>heartbeats</div>
               </div>
-            ) : (
-              /* Overview card */
-              <>
-                <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold mb-2" style={{ color: style.textColor }}>My Life in Numbers</h3>
-                  <p className="text-sm" style={{ color: style.accentColor }}>
-                    {age} Earth years • {mercuryAge} Mercury years
-                  </p>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-3 text-center">
-                  <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
-                    <div className="text-xl mb-1">💓</div>
-                    <div className="text-lg font-bold" style={{ color: style.textColor }}>{formatNumber(stats.heartbeats)}</div>
-                    <div className="text-[10px]" style={{ color: style.accentColor }}>heartbeats</div>
-                  </div>
-                  <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
-                    <div className="text-xl mb-1">🌬️</div>
-                    <div className="text-lg font-bold" style={{ color: style.textColor }}>{formatNumber(stats.breaths)}</div>
-                    <div className="text-[10px]" style={{ color: style.accentColor }}>breaths</div>
-                  </div>
-                  <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
-                    <div className="text-xl mb-1">🌙</div>
-                    <div className="text-lg font-bold" style={{ color: style.textColor }}>{stats.fullMoons}</div>
-                    <div className="text-[10px]" style={{ color: style.accentColor }}>full moons</div>
-                  </div>
-                  <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
-                    <div className="text-xl mb-1">🚀</div>
-                    <div className="text-lg font-bold" style={{ color: style.textColor }}>{formatNumber(stats.milesThroughSpace)}</div>
-                    <div className="text-[10px]" style={{ color: style.accentColor }}>miles in space</div>
-                  </div>
-                </div>
+              <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
+                <div className="text-xl mb-1">🌬️</div>
+                <div className="text-lg font-bold" style={{ color: style.textColor }}>{formatNumber(stats.breaths)}</div>
+                <div className="text-[10px]" style={{ color: style.accentColor }}>breaths</div>
+              </div>
+              <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
+                <div className="text-xl mb-1">🌙</div>
+                <div className="text-lg font-bold" style={{ color: style.textColor }}>{stats.fullMoons}</div>
+                <div className="text-[10px]" style={{ color: style.accentColor }}>full moons</div>
+              </div>
+              <div className="rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
+                <div className="text-xl mb-1">🚀</div>
+                <div className="text-lg font-bold" style={{ color: style.textColor }}>{formatNumber(stats.milesThroughSpace)}</div>
+                <div className="text-[10px]" style={{ color: style.accentColor }}>miles in space</div>
+              </div>
+            </div>
 
-                {/* Planetary ages mini */}
-                <div className="mt-4 rounded-xl p-3" style={{ backgroundColor: style.boxBg }}>
-                  <div className="text-xs mb-2 text-center" style={{ color: style.accentColor }}>Age on Other Planets</div>
-                  <div className="flex justify-center gap-4 text-center">
-                    {stats.planetaryAges.slice(0, 4).map(planet => (
-                      <div key={planet.name} className="text-center">
-                        <div className="text-sm">{planet.emoji}</div>
-                        <div className="text-xs font-bold" style={{ color: style.textColor }}>{Math.floor(planet.age)}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+            <div className="mt-4 text-center">
+              <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: style.textColor }}>
+                {stats.lifespanPercentage.toFixed(1)}% of journey complete
+              </div>
+            </div>
 
-                <div className="mt-4 text-center">
-                  <div className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold" style={{ backgroundColor: 'rgba(255,255,255,0.2)', color: style.textColor }}>
-                    {stats.lifespanPercentage.toFixed(1)}% of journey complete
-                  </div>
-                </div>
+            <div className="mt-4 text-center text-[10px]" style={{ color: style.accentColor, opacity: 0.7 }}>
+              getlifestats.com
+            </div>
+          </div>
 
-                <div className="mt-4 text-center text-[10px]" style={{ color: style.accentColor, opacity: 0.7 }}>
-                  lifestats-eight.vercel.app
-                </div>
-              </>
-            )}
+          {/* Upsell for full image */}
+          <div className="text-center text-xs text-gray-500">
+            <span className="text-blue-400">🔓 Create a free account</span> to include all 50+ stats, body data, and cosmic journey in your image
           </div>
 
           {/* Download button */}
@@ -321,12 +287,6 @@ export default function ShareCard({ stats, birthday }: ShareCardProps) {
                   <span>⬇️</span> Download PNG
                 </>
               )}
-            </button>
-            <button
-              onClick={handleTwitterShare}
-              className="px-6 py-3 rounded-xl font-semibold text-white bg-black hover:bg-gray-900 transition-colors flex items-center gap-2 border border-gray-700"
-            >
-              <span>𝕏</span> Share with text
             </button>
           </div>
         </div>

@@ -102,7 +102,7 @@ export default function StatCard({
 
   return (
     <div 
-      className={`stat-card rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] ${
+      className={`stat-card rounded-2xl p-5 cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98] flex flex-col h-full ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
       } ${hasMultipleUnits ? 'ring-1 ring-indigo-500/20' : ''}`}
       onClick={handleClick}
@@ -125,17 +125,19 @@ export default function StatCard({
       </div>
       <div className="text-sm text-gray-400">{activeLabel}</div>
       
-      {/* Hint text */}
-      {hasMultipleUnits && (
-        <div className="text-xs text-indigo-400 mt-2">
-          tap to change unit ({unitIndex + 1}/{units.length})
-        </div>
-      )}
-      {canToggleFull && (
-        <div className="text-xs text-gray-500 mt-1">
-          {showFullNumber ? 'tap to abbreviate' : 'tap for full number'}
-        </div>
-      )}
+      {/* Hint text — pinned to bottom */}
+      <div className="mt-auto pt-2">
+        {hasMultipleUnits && (
+          <div className="text-xs text-indigo-400">
+            tap to change unit ({unitIndex + 1}/{units.length})
+          </div>
+        )}
+        {canToggleFull && (
+          <div className="text-xs text-gray-500">
+            {showFullNumber ? 'tap to abbreviate' : 'tap for full number'}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

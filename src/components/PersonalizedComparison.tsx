@@ -205,55 +205,6 @@ export default function PersonalizedComparison({
     });
   }
 
-  // Commute comparison
-  if (personalData.commuteMinutes !== undefined) {
-    const baseline = isRecommended ? RECOMMENDED.commute : AVERAGES.commute;
-    const workDays = 250;
-    const workYears = Math.max(0, yearsAlive - 22);
-    const yourCommuteHours = (personalData.commuteMinutes / 60) * workDays * workYears;
-    const baselineCommuteHours = (baseline / 60) * workDays * workYears;
-    const diff = baseline > 0 ? ((personalData.commuteMinutes - baseline) / baseline) * 100 : 0;
-    
-    let highlight: 'good' | 'bad' | 'neutral';
-    let diffLabel: string;
-    
-    if (isRecommended) {
-      highlight = personalData.commuteMinutes <= 20 ? 'good' : 
-                  personalData.commuteMinutes <= 30 ? 'neutral' : 'bad';
-      diffLabel = personalData.commuteMinutes <= 20
-        ? '✓ Ideal commute length'
-        : personalData.commuteMinutes <= 30
-          ? 'Acceptable'
-          : 'Long commutes hurt wellbeing';
-    } else {
-      highlight = diff > 50 ? 'bad' : diff < -20 ? 'good' : 'neutral';
-      diffLabel = diff > 0 
-        ? `${Math.abs(diff).toFixed(0)}% longer commute`
-        : `${Math.abs(diff).toFixed(0)}% shorter`;
-    }
-    
-    comparisons.push({
-      icon: '🚗',
-      label: 'Daily Commute',
-      yours: personalData.commuteMinutes,
-      baseline,
-      unit: 'min',
-      diff,
-      diffLabel,
-      highlight,
-      insight: isRecommended ? 'Studies show <20min optimal' : undefined,
-    });
-
-    comparisons.push({
-      icon: '🛣️',
-      label: 'Lifetime Commuting',
-      yours: (yourCommuteHours / 24 / 365.25).toFixed(2),
-      baseline: (baselineCommuteHours / 24 / 365.25).toFixed(2),
-      unit: 'years',
-      highlight: 'neutral',
-    });
-  }
-
   // Daily steps
   if (personalData.dailySteps) {
     const baseline = isRecommended ? RECOMMENDED.steps : (profile.stepsPerDay || AVERAGES.steps);
@@ -309,39 +260,6 @@ export default function PersonalizedComparison({
       baseline: baselineMiles.toLocaleString(),
       unit: 'miles',
       highlight: yourMiles > baselineMiles ? 'good' : 'neutral',
-    });
-  }
-
-  // Work activity
-  if (personalData.workActivity) {
-    const workLabels: Record<string, string> = {
-      mostly_sitting: 'Mostly Sitting',
-      mixed: 'Mix Sit/Stand',
-      on_feet: 'On Your Feet',
-      physical_job: 'Physical Job',
-    };
-    
-    let highlight: 'good' | 'bad' | 'neutral';
-    let diffLabel: string | undefined;
-    
-    if (isRecommended) {
-      highlight = personalData.workActivity === 'mostly_sitting' ? 'bad' : 'good';
-      diffLabel = personalData.workActivity === 'mostly_sitting' 
-        ? 'Sitting increases health risks'
-        : '✓ Active work style';
-    } else {
-      highlight = personalData.workActivity === 'mostly_sitting' ? 'neutral' : 'good';
-    }
-    
-    comparisons.push({
-      icon: '💼',
-      label: 'Work Style',
-      yours: workLabels[personalData.workActivity] || personalData.workActivity,
-      baseline: isRecommended ? 'Mix Sit/Stand' : 'Mostly Sitting',
-      unit: isRecommended ? '(ideal)' : '(most common)',
-      highlight,
-      diffLabel,
-      insight: isRecommended ? 'Stand/move every 30 mins' : undefined,
     });
   }
 
@@ -448,17 +366,6 @@ export default function PersonalizedComparison({
     const drinkingYears = Math.max(0, yearsAlive - 21);
     const drinksPerWeek: Record<string, number> = { never: 0, occasionally: 1, weekly: 4, daily: 10 };
     const yourLifetimeDrinks = Math.floor(drinksPerWeek[personalData.alcoholFrequency] * 52 * drinkingYears);
-    
-    comparisons.push({
-      icon: '🍺',
-      label: 'Alcohol',
-      yours: alcoholLabels[personalData.alcoholFrequency],
-      baseline: isRecommended ? '≤ Occasional' : 'Occasionally',
-      unit: isRecommended ? '(CDC guideline)' : '(most common)',
-      highlight,
-      diffLabel,
-      insight: isRecommended ? 'CDC: ≤1 drink/day women, ≤2 men' : undefined,
-    });
     
     if (yourLifetimeDrinks > 0) {
       comparisons.push({
