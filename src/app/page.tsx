@@ -548,6 +548,7 @@ export default function Home() {
                   <button
                     id="gender-male"
                     type="button"
+                    tabIndex={0}
                     onClick={() => { setGender(gender === 'male' ? null : 'male'); countryRef.current?.focus(); }}
                     className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
                       gender === 'male'
@@ -560,6 +561,7 @@ export default function Home() {
                   <button
                     id="gender-female"
                     type="button"
+                    tabIndex={0}
                     onClick={() => { setGender(gender === 'female' ? null : 'female'); countryRef.current?.focus(); }}
                     className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
                       gender === 'female'
