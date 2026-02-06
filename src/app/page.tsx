@@ -550,7 +550,7 @@ export default function Home() {
                     type="button"
                     tabIndex={0}
                     onClick={() => { setGender(gender === 'male' ? null : 'male'); countryRef.current?.focus(); }}
-                    className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
+                    className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
                       gender === 'male'
                         ? 'bg-blue-500/30 border-2 border-blue-500 text-blue-300'
                         : 'bg-gray-800/50 border border-gray-700 text-gray-400 hover:border-gray-600'
@@ -563,7 +563,7 @@ export default function Home() {
                     type="button"
                     tabIndex={0}
                     onClick={() => { setGender(gender === 'female' ? null : 'female'); countryRef.current?.focus(); }}
-                    className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all ${
+                    className={`flex-1 py-2.5 px-4 rounded-xl font-medium transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 ${
                       gender === 'female'
                         ? 'bg-pink-500/30 border-2 border-pink-500 text-pink-300'
                         : 'bg-gray-800/50 border border-gray-700 text-gray-400 hover:border-gray-600'
@@ -595,6 +595,7 @@ export default function Home() {
               <button
                 ref={submitButtonRef}
                 type="submit"
+                tabIndex={0}
                 className="btn-primary w-full mt-4 py-3 rounded-xl font-semibold text-white text-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
               >
                 ✨ Calculate My Stats
