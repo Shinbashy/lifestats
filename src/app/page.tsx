@@ -226,6 +226,14 @@ export default function Home() {
       const gStats = calculateGenderStats(date, gender, new Date(), country);
       setGenderStats(gStats);
     }
+    
+    // Log submission to Supabase (fire-and-forget, no blocking)
+    const [year, month, day] = birthday.split('-').map(Number);
+    fetch('/api/log-submission', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ month, day, year, gender, location: country }),
+    }).catch(err => console.error('Failed to log submission:', err));
   }, [birthday, gender, country]);
 
   // Live seconds counter
