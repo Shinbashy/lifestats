@@ -329,8 +329,8 @@ export const GENERATIONS = [
   { name: 'Greatest Generation', start: 1901, end: 1927, emoji: '🎖️', traits: ['Resilient', 'Patriotic', 'Self-sacrificing'] },
   { name: 'Silent Generation', start: 1928, end: 1945, emoji: '📻', traits: ['Disciplined', 'Respectful', 'Loyal'] },
   { name: 'Baby Boomer', start: 1946, end: 1964, emoji: '📺', traits: ['Optimistic', 'Competitive', 'Workaholic'] },
-  { name: 'Generation X', start: 1965, end: 1980, emoji: '📼', traits: ['Independent', 'Skeptical', 'Adaptable'] },
-  { name: 'Millennial', start: 1981, end: 1996, emoji: '💻', traits: ['Tech-savvy', 'Collaborative', 'Purpose-driven'] },
+  { name: 'Generation X', start: 1965, end: 1981, emoji: '📼', traits: ['Independent', 'Skeptical', 'Adaptable'] },
+  { name: 'Millennial', start: 1982, end: 1996, emoji: '💻', traits: ['Tech-savvy', 'Collaborative', 'Purpose-driven'] },
   { name: 'Generation Z', start: 1997, end: 2012, emoji: '📱', traits: ['Digital native', 'Pragmatic', 'Diverse'] },
   { name: 'Generation Alpha', start: 2013, end: 2025, emoji: '🤖', traits: ['AI native', 'Global', 'Visual learners'] },
 ];
