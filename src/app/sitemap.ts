@@ -54,5 +54,18 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: 'weekly',
       priority: 0.8,
     },
+    // New high-priority landing pages (Feb 2026)
+    {
+      url: `${baseUrl}/life-expectancy-calculator`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
+    {
+      url: `${baseUrl}/days-until-birthday`,
+      lastModified: currentDate,
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
   ];
 }
