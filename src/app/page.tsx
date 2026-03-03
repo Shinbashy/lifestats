@@ -13,6 +13,7 @@ import SortableGrid from '@/components/SortableGrid';
 // LockedSection removed — everything free until premium features (PDF export, save/track) are built
 import PersonalizationModal, { PersonalData } from '@/components/PersonalizationModal';
 import PersonalizedComparison from '@/components/PersonalizedComparison';
+import ExportButton from '@/components/ExportButton';
 import { saveProfile, loadProfile, UserProfile } from '@/lib/supabase';
 
 // Helpers to convert between frontend PersonalData and database UserProfile
@@ -1233,6 +1234,25 @@ export default function Home() {
                 </ul>
               </div>
             </CollapsibleSection>
+
+            {/* PDF Export — Premium-ready (free now, gate with Stripe later) */}
+            <div className="stat-card rounded-2xl p-6 border-2 border-indigo-500/20 bg-gradient-to-r from-indigo-500/5 to-purple-500/5">
+              <div className="flex flex-col items-center gap-3 text-center">
+                <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+                  <span>📄</span> Download Your Life Report
+                </h3>
+                <p className="text-sm text-gray-400 max-w-xs">
+                  Get a beautifully formatted PDF with all your stats, progress bars, and fun facts.
+                </p>
+                <ExportButton
+                  stats={stats}
+                  genderStats={genderStats}
+                  birthday={birthdayDate}
+                  gender={gender}
+                  country={country}
+                />
+              </div>
+            </div>
 
             <ShareCard stats={stats} birthday={birthdayDate} />
 
