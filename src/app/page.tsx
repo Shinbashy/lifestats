@@ -14,6 +14,9 @@ import SortableGrid from '@/components/SortableGrid';
 import PersonalizationModal, { PersonalData } from '@/components/PersonalizationModal';
 import PersonalizedComparison from '@/components/PersonalizedComparison';
 import ExportButton from '@/components/ExportButton';
+import PremiumGate from '@/components/PremiumGate';
+import UpgradeModal from '@/components/UpgradeModal';
+import UpgradeBanner from '@/components/UpgradeBanner';
 import { saveProfile, loadProfile, UserProfile } from '@/lib/supabase';
 
 // Helpers to convert between frontend PersonalData and database UserProfile
@@ -137,6 +140,9 @@ export default function Home() {
   const [profileId, setProfileId] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [showSavedToast, setShowSavedToast] = useState(false);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  // isPremium: always false until Stripe subscription is connected
+  const [isPremium] = useState(false);
   // Future: previewMode for gating when premium features (PDF, save/track) are built
   const submitButtonRef = useRef<HTMLButtonElement>(null);
   const dayRef = useRef<HTMLInputElement>(null);
@@ -821,9 +827,14 @@ export default function Home() {
               <CollapsibleSection 
                 title={`${gender === 'male' ? 'Male' : 'Female'} Stats`} 
                 icon={gender === 'male' ? '♂️' : '♀️'}
-                badge="✨ PREMIUM"
+                badge="★ Premium"
                 badgeColor="amber"
               >
+                <PremiumGate
+                  featureLabel="Gender-Specific Insights"
+                  isPremium={isPremium}
+                  onUpgrade={() => setShowUpgradeModal(true)}
+                >
                 <div className="stat-card rounded-2xl p-6 border-2 border-amber-500/30">
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
                     <div className="bg-gray-800/50 rounded-xl p-4">
@@ -891,6 +902,7 @@ export default function Home() {
                     </div>
                   )}
                 </div>
+                </PremiumGate>
               </CollapsibleSection>
             )}
 
@@ -1272,6 +1284,12 @@ export default function Home() {
           </div>
         )}
 
+        {/* Upgrade Modal */}
+        <UpgradeModal
+          isOpen={showUpgradeModal}
+          onClose={() => setShowUpgradeModal(false)}
+        />
+
         {/* Personalization Modal */}
         <PersonalizationModal
           isOpen={showPersonalization}
@@ -1317,6 +1335,11 @@ export default function Home() {
           }}
         />
       </div>
+      {/* Sticky Upgrade Banner */}
+      {stats && (
+        <UpgradeBanner onUpgrade={() => setShowUpgradeModal(true)} />
+      )}
+
       {/* Footer */}
       <footer className="mt-16 pb-8 text-center text-xs text-gray-600">
         <div className="flex items-center justify-center gap-4">
