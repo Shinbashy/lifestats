@@ -68,12 +68,28 @@ export default function RootLayout({
     },
   };
 
+  const orgLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "LifeStats",
+    url: "https://getlifestats.com",
+    logo: "https://getlifestats.com/icon.png",
+    description: "Free online calculators that turn your birthday into 50+ personalized life statistics.",
+    sameAs: [
+      "https://twitter.com/ZeroShotTakes"
+    ],
+  };
+
   return (
     <html lang="en">
       <head>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgLd) }}
         />
       </head>
       <body className="antialiased">

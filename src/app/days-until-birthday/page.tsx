@@ -269,6 +269,12 @@ export default function DaysUntilBirthday() {
           <div className="bg-indigo-500/20 border border-indigo-400/30 rounded-2xl p-6 mb-8">
             <h2 className="text-2xl font-semibold mb-3">🔗 Related Calculators</h2>
             <div className="grid md:grid-cols-2 gap-3">
+              <Link href="/how-many-heartbeats" className="text-indigo-300 hover:text-indigo-200 hover:underline">
+                → How Many Heartbeats Have I Had?
+              </Link>
+              <Link href="/how-many-breaths" className="text-indigo-300 hover:text-indigo-200 hover:underline">
+                → How Many Breaths Have I Taken?
+              </Link>
               <Link href="/how-old-am-i-in-seconds" className="text-indigo-300 hover:text-indigo-200 hover:underline">
                 → How Old Am I in Seconds?
               </Link>

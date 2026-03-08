@@ -258,6 +258,9 @@ export default function LifeExpectancyCalculator() {
               <Link href="/how-many-heartbeats" className="text-indigo-300 hover:text-indigo-200 hover:underline">
                 → How Many Heartbeats Have I Had?
               </Link>
+              <Link href="/how-many-breaths" className="text-indigo-300 hover:text-indigo-200 hover:underline">
+                → How Many Breaths Have I Taken?
+              </Link>
               <Link href="/how-old-am-i-in-seconds" className="text-indigo-300 hover:text-indigo-200 hover:underline">
                 → How Old Am I in Seconds?
               </Link>
@@ -266,6 +269,9 @@ export default function LifeExpectancyCalculator() {
               </Link>
               <Link href="/life-in-numbers" className="text-indigo-300 hover:text-indigo-200 hover:underline">
                 → Your Life in Numbers
+              </Link>
+              <Link href="/days-until-birthday" className="text-indigo-300 hover:text-indigo-200 hover:underline">
+                → Days Until My Birthday
               </Link>
             </div>
           </div>
